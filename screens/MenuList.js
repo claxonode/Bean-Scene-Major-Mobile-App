@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, VirtualizedList} from 'react-native';
+import { Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
 import {MENULIST,transformMenuForSectionList} from '../data/data';
 
 const filterMain = MENULIST.filter(x=>x.category==="MAIN")
@@ -52,6 +52,10 @@ function MenuList({navigation}){
   
   const isInCart = (id)=>orderCart.some(x=>x.id===id)
   const quantity = (id)=>isInCart(id) ?  orderCart.find(x=>x.id===id).quantity:  0
+  const total = orderCart.reduce((acc,item)=>{
+    acc += item.quantity * item.price
+    return acc
+  },0)
   //TO DO: Style FilterSearch
   //TO DO: add <CreateOrder> at SectionList's ListFooterComponent
 
@@ -72,14 +76,14 @@ function MenuList({navigation}){
     setSortBy(text)
   }
   function handleAddToCart(item) {
-    setOrderCart([...orderCart,{id:item._id,data:item,quantity:1}])
+    setOrderCart([...orderCart,{id:item._id,name:item.name,price:item.price,quantity:1}])
   }
   function handleRemoveFromCart(id) {
-    setOrderCart(orderCart.filter(x=>x.data._id !== id))
+    setOrderCart(orderCart.filter(x=>x.id !== id))
   }
   function handleIncrease(id) {
     setOrderCart(orderCart.map(item=>{
-      if (item.data._id===id) {
+      if (item.id===id) {
         // item.data.quantity++
         return {
           ...item,quantity: item.quantity + 1
@@ -92,7 +96,7 @@ function MenuList({navigation}){
   }
   function handleDecrease(id) {
     setOrderCart(orderCart.map(item=>{
-      if (item.data._id===id) {
+      if (item.id===id) {
         return {
           ...item,
           quantity: item.quantity -1
@@ -116,6 +120,7 @@ function MenuList({navigation}){
       onPress={()=>navigation.
         navigate("New Order",{
           orderCart: orderCart,
+          total:total
         })}/>}
     >
     </SectionList>
@@ -135,11 +140,32 @@ function MenuItem({item,onPress,inCart,handleIncrease,handleDecrease,handleRemov
       <Text>{item.name}</Text>
       <Text>{item.description}</Text>
       <Text>Price: {price}</Text>
-      <Text>Quantity: {quantity}</Text>
+      {inCart(item._id)
+      ?<View>
+        <Text>Quantity: {quantity}</Text>
+        <Button title="Increase" onPress={()=>{handleIncrease(item._id)}}></Button>
+        <Button disabled={quantity===1} title="Decrease" onPress={()=>{handleDecrease(item._id)}}></Button>
+        <Button disabled={!inCart(item._id)} title="Remove" onPress={()=>
+          // {handleRemove(item._id)}
+          Alert.alert(`Are you sure you want to remove \n${item.name} x${quantity}?`,'',[
+            {
+              text:"Yes",
+              onPress:()=>handleRemove(item._id)
+            },
+            {
+              text:"No",
+              onPress:()=>{}
+            }
+          ])
+          } />
+      </View>
+      :<Button title={inCart(item._id)?"In cart":"Add To Cart"} onPress={()=>onPress(item)}></Button>
+      }
+      {/* <Text>Quantity: {quantity}</Text>
       <Button title="Increase" onPress={()=>{handleIncrease(item._id)}}></Button>
       <Button disabled={quantity===1} title="Decrease" onPress={()=>{handleDecrease(item._id)}}></Button>
       <Button disabled={!inCart(item._id)} title="Remove" onPress={()=>handleRemove(item._id)} />
-      <Button disabled={inCart(item._id)} title={inCart(item._id)?"In cart":"Add To Cart"} onPress={()=>onPress(item)}></Button>
+      <Button disabled={inCart(item._id)} title={inCart(item._id)?"In cart":"Add To Cart"} onPress={()=>onPress(item)}></Button> */}
     </View>
   </View>);
 }

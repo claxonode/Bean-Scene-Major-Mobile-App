@@ -1,23 +1,34 @@
 import { Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, VirtualizedList} from 'react-native';
 
 function OrderList({navigation,route}) {
+
+  
     const {orderCart} = route.params
+    const {total} = route.params
     // const {handleRemove} = route.params
     return <FlatList data={orderCart}
-      renderItem={({item})=><OrderItem prop={item}/>}
+      renderItem={({item})=><OrderItem item={item}/>}
       keyExtractor={item=>item.id}
       extraData={orderCart}
+      ListHeaderComponent={<OrderHeader total={total}/>}
     >
     </FlatList>
   }
   
-  function OrderItem({prop}) {
-    const price = new Intl.NumberFormat('en-AU',{style:'currency', currency:'AUD'}).format(prop.data.price);
+  function OrderItem({item}) {
+    const price = new Intl.NumberFormat('en-AU',{style:'currency', currency:'AUD'}).format(item.price);
     return <View style={styles.item}>
-      <Text>{prop.data.name}</Text>
+      <Text>{item.name}</Text>
         <Text>Price: {price}</Text>
-        <Text>Quantity: {prop.quantity}</Text>
+        <Text>Quantity: {item.quantity}</Text>
         
+    </View>
+  }
+
+  function OrderHeader({total}) {
+    const price = new Intl.NumberFormat('en-AU',{style:'currency', currency:'AUD'}).format(total);
+    return <View>
+      <Text style={styles.header}>Total {price}</Text>
     </View>
   }
 
