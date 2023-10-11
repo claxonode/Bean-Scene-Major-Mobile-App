@@ -6,7 +6,7 @@ const filterMain = MENULIST.filter(x=>x.category==="MAIN")
 const filterDrink = MENULIST.filter(x=>x.category==="DRINK")
 // const array= [{title:"MAIN",data:filterMain},{title:"DRINK",data:filterDrink}]
 
-let i = 0;
+
 function FilterSearch({text,onChange}) {
 
   return <TextInput
@@ -123,7 +123,19 @@ function MenuList({navigation}){
           total:total
         })}/>}
     >
-    </SectionList>
+    </SectionList >
+    {/* <FlatList data={MENULIST}
+    renderItem={renderItem}
+    extraData={quantity}
+    keyExtractor={item=>item._id}
+    ListFooterComponent={<Button disabled={orderCart.length===0} title={"View Order"} 
+    onPress={()=>navigation.
+      navigate("New Order",{
+        orderCart: orderCart,
+        total:total
+      })}/>}
+    >
+    </FlatList> */}
 
     </View>
       
