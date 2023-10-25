@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import MenuList from './screens/MenuList'
+// import MenuList from './screens/MenuList'
+import MenuList from './screens/TestMenuList'
 import OrderList from './screens/CreateOrder'
 
 
