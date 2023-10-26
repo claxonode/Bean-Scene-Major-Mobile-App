@@ -1,4 +1,5 @@
-const BASE_URL = "http://10.0.2.2:7200";
+const BASE_URL = "http://10.0.2.2:5240";
+
 
 export async function getAllTables() {
     const finalUrl = new URL('api/tables', BASE_URL)
