@@ -1,5 +1,5 @@
 // const BASE_URL = "https://localhost:7200/"//location
-const BASE_URL = "http://10.0.2.2:5147";
+const BASE_URL = "http://10.0.2.2:5240";
 
 export async function getAllMenuItems() {
     const finalUrl = new URL('/staff/api/MenuItems',BASE_URL);
@@ -17,15 +17,15 @@ export async function getAllMenuItemsByCategory() {
     return data;
 }
 
-async function testGetAllMenuItems() {
-    const menuItems = await getAllMovies();
+// async function testGetAllMenuItems() {
+//     const menuItems = await getAllMenuItemsByCategory();
 
-    for (const movie of menuItems) {
-        console.log('Movie Details');
-        console.log('Id: ' + movie.id);
-        console.log('Title: ' + movie.name);
-        console.log('Price: ' + movie.description);
-        console.log("Category: "+ movie.category)
-    }
-}
-testGetAllMenuItems()
+//     for (const item of menuItems) {
+//         console.log('Menu Details');
+//         console.log('Id: ' + item.id);
+//         console.log('Name: ' + item.name);
+//         console.log('Price: ' + item.description);
+//         console.log("Category: "+ item.category)
+//     }
+// }
+// testGetAllMenuItems()

@@ -4,6 +4,7 @@ import { View, Text, Button, FlatList } from 'react-native';
 import {getAllTables} from "../services/TableApiService"
 
 
+
 export default function TableSelection() {
   const [tables, setTables] = useState([]);
 
@@ -26,6 +27,7 @@ export default function TableSelection() {
   return (
     <FlatList
       data={tables}
+      keyExtractor={item=>item.id}
       renderItem={({ item }) => {
         return (
           <Text>
