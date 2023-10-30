@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button, StyleSheet, Text, View, TextInput } from 'react-native';
 import { login, fetchSecuredResource, signOut } from '../services/LoginApiService';
 import { Alert } from 'react-native';
-import { getToken } from '../testing cannotcompile/TokenStorage';
+import { getToken } from '../services/TokenStorage';
 
 export default function DebugLoginScreen({ navigation }) {
     const [username, setUsername] = useState(null);
