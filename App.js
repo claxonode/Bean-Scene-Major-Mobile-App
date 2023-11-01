@@ -49,6 +49,10 @@ export default function App({ navigation }) {
     () => ({
       signIn: async (data) => {
         const {username,password} =data;
+        if (username == null || password ==null) {
+          Alert.alert("Enter your credentials")
+          return;
+        }
         const result = await login(username,password)
         if (result.authenticated){
           setToken(result.token)

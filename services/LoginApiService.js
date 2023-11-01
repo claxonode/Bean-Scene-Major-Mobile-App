@@ -30,12 +30,12 @@ export async function login(username, password) {
     }
     else {
         
-        const modelStateErrors = await response.json();
+        const modelStateErrors = await response.text();
         console.log(modelStateErrors)
         // throw new ApiError(modelStateErrors,
         //     "There was an error authen to the API"
         // );
-        Alert.alert(modelStateErrors.status+" could not log in")
+        Alert.alert(modelStateErrors)
         return {
             authenticated: false,
             token: null
