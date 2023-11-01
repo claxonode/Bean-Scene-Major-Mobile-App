@@ -1,20 +1,48 @@
-// const BASE_URL = "https://localhost:7200/"//location
+import { getToken } from "./TokenStorage";
 const BASE_URL = "http://10.0.2.2:5240";
 
+
+
 export async function getAllMenuItems() {
-    const finalUrl = new URL('/staff/api/MenuItems',BASE_URL);
-    
-    const response = await fetch(finalUrl);
-    const data = await response.json();
-    return data;
+    const finalUrl = new URL('api/menuItems/', BASE_URL)
+    const token = await getToken();
+    try {
+        const response = await fetch(finalUrl,{
+            method:'GET',
+            headers:{
+                "Authorization":`Bearer ${token}`
+            }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.log('There has been a problem with your fetch operation: ' + error.message);
+        throw error;
+      }
 }
 
 export async function getAllMenuItemsByCategory() {
-    const finalUrl = new URL('/staff/api/MenuItemsByCategory',BASE_URL);
-    
-    const response = await fetch(finalUrl);
-    const data = await response.json();
-    return data;
+    const finalUrl = new URL('api/menuItems/asSectionData', BASE_URL)
+    const token = await getToken();
+    try {
+        const response = await fetch(finalUrl,{
+            method:'GET',
+            headers:{
+                "Authorization":`Bearer ${token}`
+            }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.log('There has been a problem with your fetch operation: ' + error.message);
+        throw error;
+      }
 }
 
 // async function testGetAllMenuItems() {
