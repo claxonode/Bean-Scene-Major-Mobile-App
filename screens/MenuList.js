@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
+import {SafeAreaView, Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
 import {MENULIST,transformMenuForSectionList} from '../data/data';
 import { useRoute } from '@react-navigation/native';
+import { Searchbar,SegmentedButtons } from 'react-native-paper';
 
 const filterMain = MENULIST.filter(x=>x.category==="MAIN")
 const filterDrink = MENULIST.filter(x=>x.category==="DRINK")
 // const array= [{title:"MAIN",data:filterMain},{title:"DRINK",data:filterDrink}]
+
 
 function SelectedTableDetails() {
   const route = useRoute();
@@ -20,21 +22,35 @@ function SelectedTableDetails() {
 
 function FilterSearch({text,onChange}) {
 
-  return <TextInput
-  style={styles.input} 
-  onChangeText={onChange}
-  value={text}
-  placeholder='Enter a menu item name'
-  maxLength={40}
-  >
-  </TextInput>
+  // return <TextInput
+  // style={styles.input} 
+  // onChangeText={onChange}
+  // value={text}
+  // placeholder='Enter a menu item name'
+  // maxLength={40}
+  // >
+  // </TextInput>
+
+  return (<Searchbar
+      placeholder="Search"
+      onChangeText={onChange}
+      value={text}
+    />
+  );
+  
 }
 function FilterCategory({onChange})  {
+  const[value,setValue] = useState('');
   return <View>
     <Button title='All' onPress={()=>onChange("All")}></Button>
     <Button title='Drink'onPress={()=>onChange("Drink")}></Button>
     <Button title='Main'onPress={()=>onChange("Main")}></Button>
   </View>
+  // return (<SafeAreaView>
+  //   <SegmentedButtons
+  //     value={value}
+  //   />
+  // </SafeAreaView>)
 }
 function SortOrderButton({onChange}) {
   return <View>

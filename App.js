@@ -2,24 +2,36 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
+import { Alert } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
+import { name as appName } from './app.json';
+import { AppRegistry } from 'react-native';
 
 ///Screens
-import MenuList from './screens/TestMenuList'
+import MenuList from './screens/MenuList'
 import OrderList from './screens/CreateOrder'
 import TableSelection from './screens/TableSelection';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 
-import DebugLoginScreen from './screens/DebugLoginScreen';
+
 //Services
 import { AuthContext } from './services/AuthContext';
 import {login,signOut}from './services/LoginApiService'
 import {getToken,deleteToken} from './services/TokenStorage'
 
 const Stack = createNativeStackNavigator();
+export default function Main() {
+  return (
+    <PaperProvider>
+      <App/>
+    </PaperProvider>
+  );
+}
 
+AppRegistry.registerComponent(appName, () => Main);
 
-export default function App({ navigation }) {
+function App({ navigation }) {
   const [token,setToken] = React.useState(null)
 
   React.useEffect(() => {
