@@ -3,16 +3,22 @@ import { Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionLis
 function OrderList({navigation,route}) {
 
   
-    const {orderCart} = route.params
-    const {total} = route.params
+  const { orderCart, total, selectedTable } = route.params;
+  
     // const {handleRemove} = route.params
-    return <FlatList data={orderCart}
-      renderItem={({item})=><OrderItem item={item}/>}
-      keyExtractor={item=>item.id}
-      extraData={orderCart}
-      ListHeaderComponent={<OrderHeader total={total}/>}
-    >
-    </FlatList>
+    return (
+      <View style={styles.mainContainer}>
+        <Text>Table Name: {selectedTable.name}</Text>
+        <Text>Table Area: {selectedTable.area}</Text>
+        <FlatList
+          data={orderCart}
+          renderItem={({ item }) => <OrderItem item={item} />}
+          keyExtractor={(item) => item.id}
+          extraData={orderCart}
+          ListHeaderComponent={<OrderHeader total={total} />}
+        />
+      </View>
+    );
   }
   
   function OrderItem({item}) {

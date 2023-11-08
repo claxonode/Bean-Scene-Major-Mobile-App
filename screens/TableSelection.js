@@ -1,89 +1,71 @@
-import {useFocusEffect} from '@react-navigation/native';
-import React, { useState} from 'react';
-import { View, Text, Button, FlatList } from 'react-native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import React, { useEffect, useState} from 'react';
+import { View, Text, Button, SectionList } from 'react-native';
 import {getAllTables} from "../services/TableApiService"
 
 
 
 export default function TableSelection() {
+  const navigation = useNavigation();
   const [tables, setTables] = useState([]);
+  const [selectedTable, setSelectedTable] = useState(null);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      async function fetchData() {
-        try {
-          const tablesData = await getAllTables();
-          setTables(tablesData);
-        } catch (error) {
-          console.error('Error fetching tables:', error);
-        }
+  function onTableSelect(selectedTable) {
+    // Handle the selected table
+    console.log('Selected table:', selectedTable);
+    // Add your logic for handling the selected table
+    navigation.navigate('MenuList', { selectedTable });
+  };
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const tablesData = await getAllTables();
+        setTables(tablesData);
+      } catch (error) {
+        console.error('Error fetching tables:', error);
       }
+    }
 
-      fetchData();
-    }, [])
-  );
+    fetchData();
+  }, []);
 
-  
+  const handleTableSelect = (table) => {
+    setSelectedTable(table);
+    onTableSelect(table); // Pass the selected table back to the parent component
+  };
+
+  // Group tables by area
+  const groupedTables = tables.reduce((acc, table) => {
+    acc[table.area] = acc[table.area] || [];
+    acc[table.area].push(table);
+    return acc;
+  }, {});
+
+  const sections = Object.keys(groupedTables).map((area) => ({
+    title: area,
+    data: groupedTables[area],
+  }));
+
   return (
-    <FlatList
-      data={tables}
-      keyExtractor={item=>item.id}
-      renderItem={({ item }) => {
-        return (
-          <Text>
-            Table {item.id}: {item.name} in {item.area} area.
-          </Text>
-        );
-      }}
-    />
-  ); 
+    <View>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Button
+            title={`Table ${item.id}: ${item.name}`}
+            onPress={() => handleTableSelect(item)}
+          />
+        )}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={{ fontWeight: 'bold' }}>{title}</Text>
+        )}
+      />
+      {selectedTable && (
+        <Text>
+          Selected Table: Table {selectedTable.id} - {selectedTable.name} in {selectedTable.area}
+        </Text>
+      )}
+    </View>
+  );
 }
-
-
-// function TableSelection({ onTableSelect }) {
-//   const [tables, setTables] = useState([]);
-//   const [selectedTable, setSelectedTable] = useState(null);
-
-//   useEffect(() => {
-//     // Fetch available tables from the API
-//     fetch('https://124.171.239.233/api/mobiletables')
-//     .then((response) => {
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! Status: ${response.status}`);
-//       }
-//       return response.json();
-//     })
-//     .then((data) => {
-//       setTables(data);
-//     })
-//     .catch((error) => {
-//       console.error('Error fetching tables:', error);
-//     });
-// }, []);
-
-//   const handleTableSelect = (table) => {
-//     setSelectedTable(table);
-//     onTableSelect(table); // Pass the selected table back to the parent component
-//   };
-
-//   return (
-//     <View>
-//     <Text>Select a Table: {tables}</Text>
-//     <FlatList
-//       data={tables}
-//       keyExtractor={(table) => table.id.toString()}
-//       renderItem={({ table }) => (
-//         <Button
-//           title={`Table ${table.id}: ${table.Name} in ${table.Area}`}
-//           onPress={() => handleTableSelect(item)}
-//         />
-//       )}
-//     />
-//     {selectedTable && (
-//       <Text>
-//         Selected Table: Table {selectedTable.id} - {selectedTable.Name} in {selectedTable.Area}
-//       </Text>
-//     )}
-//   </View>
-// );
-// }

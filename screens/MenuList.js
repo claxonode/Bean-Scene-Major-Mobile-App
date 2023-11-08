@@ -1,11 +1,22 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
 import {MENULIST,transformMenuForSectionList} from '../data/data';
+import { useRoute } from '@react-navigation/native';
 
 const filterMain = MENULIST.filter(x=>x.category==="MAIN")
 const filterDrink = MENULIST.filter(x=>x.category==="DRINK")
 // const array= [{title:"MAIN",data:filterMain},{title:"DRINK",data:filterDrink}]
 
+function SelectedTableDetails() {
+  const route = useRoute();
+  const {selectedTable} = route.params;
+  return (
+    <View>
+      <Text style={{fontSize:30}}>Ordering for Table {selectedTable.name} in the {selectedTable.area} area</Text>
+      {/* You can add more details about the table if needed */}
+    </View>
+  );
+};
 
 function FilterSearch({text,onChange}) {
 
@@ -35,6 +46,7 @@ function SortOrderButton({onChange}) {
 }
 function FilterAndSortHeader({handleSearch,handleCategory,handleSort}) {
   return <View>
+    <SelectedTableDetails></SelectedTableDetails>
     <FilterSearch onChange={handleSearch}></FilterSearch>
     <FilterCategory onChange={handleCategory}></FilterCategory>
     <SortOrderButton onChange={handleSort}></SortOrderButton>
@@ -42,6 +54,9 @@ function FilterAndSortHeader({handleSearch,handleCategory,handleSort}) {
 }
 
 function MenuList({navigation}){
+  const route = useRoute();
+  const { selectedTable } = route.params;
+
   const [searchText,setSearchText] = useState("")
   const [sortBy,setSortBy] = useState("sortDescendPrice")  //sortAscendName,sortDescendName,sortAscendPrice,sortDescendPrice
   const [filterCategory,setFilterCategory] = useState("all") //"All,Drink,Main"
@@ -76,7 +91,7 @@ function MenuList({navigation}){
     setSortBy(text)
   }
   function handleAddToCart(item) {
-    setOrderCart([...orderCart,{id:item._id,name:item.name,price:item.price,quantity:1}])
+    setOrderCart([...orderCart,{id:item._id,name:item.name,price:item.price,quantity:1,}])
   }
   function handleRemoveFromCart(id) {
     setOrderCart(orderCart.filter(x=>x.id !== id))
@@ -120,7 +135,8 @@ function MenuList({navigation}){
       onPress={()=>navigation.
         navigate("New Order",{
           orderCart: orderCart,
-          total:total
+          total:total,
+          selectedTable: selectedTable
         })}/>}
     >
     </SectionList >
@@ -183,7 +199,9 @@ function MenuItem({item,onPress,inCart,handleIncrease,handleDecrease,handleRemov
 }
 
 function MenuHeader({section}) {
-  return <Text style={styles.header}>{section.title}</Text>
+  return (
+    <Text style={styles.header}>{section.title}</Text>
+  )
 }
 
 
