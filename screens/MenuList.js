@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {SafeAreaView, Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
 import {MENULIST,transformMenuForSectionList} from '../data/data';
 import { useRoute } from '@react-navigation/native';
-import { Searchbar,SegmentedButtons } from 'react-native-paper';
+import { Searchbar,SegmentedButtons,List,IconButton  } from 'react-native-paper';
 
 const filterMain = MENULIST.filter(x=>x.category==="MAIN")
 const filterDrink = MENULIST.filter(x=>x.category==="DRINK")
@@ -30,42 +30,100 @@ function FilterSearch({text,onChange}) {
   // maxLength={40}
   // >
   // </TextInput>
-
-  return (<Searchbar
-      placeholder="Search"
+  return (
+    <Searchbar
+      placeholder="Search menu"
       onChangeText={onChange}
       value={text}
+      style={{width:300}}
     />
+  
   );
   
 }
 function FilterCategory({onChange})  {
-  const[value,setValue] = useState('');
-  return <View>
-    <Button title='All' onPress={()=>onChange("All")}></Button>
-    <Button title='Drink'onPress={()=>onChange("Drink")}></Button>
-    <Button title='Main'onPress={()=>onChange("Main")}></Button>
-  </View>
-  // return (<SafeAreaView>
-  //   <SegmentedButtons
-  //     value={value}
-  //   />
-  // </SafeAreaView>)
+  // return <View>
+  //   <Button title='All' onPress={()=>onChange("All")}></Button>
+  //   <Button title='Drink'onPress={()=>onChange("Drink")}></Button>
+  //   <Button title='Main'onPress={()=>onChange("Main")}></Button>
+  // </View>
+  const [value, setValue] = useState('');
+  return (<SafeAreaView>
+    <SegmentedButtons
+      value={value}
+      onValueChange={(value)=>{
+        onChange(value)
+      }}
+      buttons={[
+        {
+          value:'All',
+          label:'All',
+        },
+        {
+          value:'Drink',
+          label:'Drink'
+        },
+        {
+          value:'Main',
+          label:'Main'
+        },
+      ]}
+    />
+  </SafeAreaView>)
 }
 function SortOrderButton({onChange}) {
-  return <View>
-    <Button title='Sort by Name Ascending' onPress={()=>onChange("sortAscendName")}></Button>
-    <Button title='Sort by Name Descending' onPress={()=>onChange("sortDescendName")}></Button>
-    <Button title='Sort by Price Ascending' onPress={()=>onChange("sortAscendPrice")}></Button>
-    <Button title='Sort by Price Descending' onPress={()=>onChange("sortDescendPrice")}></Button>
-  </View>
+  const [expand,setExpand] = useState(false)
+  const handleExpand = ()=> setExpand(!expand)
+  const handleSelectOption = (sortParam)=> {
+    onChange(sortParam)
+    handleExpand()
+  }
+  const sortTypes = [
+    {text:"Name ascending",param:"sortAscendName"},
+    {text:"Name descending",param:"sortDescendName"},
+    {text:"Price ascending",param:"sortAscendPrice"},
+    {text:"Price descending",param:"sortDescendPrice"},]
+
+  const listSortTypes = sortTypes.map(item=>
+    <View key={item.name}>
+      <Pressable onPress={() => handleSelectOption(item.param)}>
+        <Text>{item.text}</Text>
+      </Pressable>
+    </View>
+    )
+  return (
+    // <IconButton icon="sort" size={30} onPress={handlePress}>
+      <View style={{flexDirection:'column',position:'relative'}}>
+        <View>
+          <IconButton icon="sort" size={30} onPress={handleExpand}></IconButton>
+        </View>
+        {expand===true
+        ? 
+        <View style={
+          {flexDirection:'column',
+          position:'absolute',right:60, width:'250%',bottom:5, backgroundColor:'white',zIndex:1,
+          borderWidth: 3, borderRadius:4,
+          }
+          }>
+            {listSortTypes}
+        </View>
+        :<></>}
+        
+      </View>
+  );
+
 }
 function FilterAndSortHeader({handleSearch,handleCategory,handleSort}) {
   return <View>
     <SelectedTableDetails></SelectedTableDetails>
-    <FilterSearch onChange={handleSearch}></FilterSearch>
+    <View style={{flexDirection:'row'}}>
+      <FilterSearch onChange={handleSearch}></FilterSearch>
+      <SortOrderButton onChange={handleSort}></SortOrderButton>
+      {/*Geoff ToDo: Add a shopping cart icon, that uses modal to confirm order.. when you click submit it post to the server*/}
+      {/* Also button style for each item can change. */}
+    </View>
     <FilterCategory onChange={handleCategory}></FilterCategory>
-    <SortOrderButton onChange={handleSort}></SortOrderButton>
+    
   </View>
 }
 
@@ -253,6 +311,13 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       padding: 10,
     },
+    sortBy: {
+      flexDirection:'row'
+    },
+    sortOption: {
+      height:50,
+      width:50,
+    }
   });
 
 export default MenuList;
