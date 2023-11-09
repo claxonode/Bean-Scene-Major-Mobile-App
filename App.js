@@ -110,7 +110,7 @@ function App({ navigation }) {
               {/* <Stack.Screen name="Debug" component={DebugLoginScreen}/> */}
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Tables" component={TableSelection}/>
-              <Stack.Screen name='MenuList' component={MenuList} />
+              <Stack.Screen name='MenuList' component={MenuList} options={({route})=>({title:route.params.name})} />
               <Stack.Screen name='New Order' component={OrderList}/>
             </>
           )}

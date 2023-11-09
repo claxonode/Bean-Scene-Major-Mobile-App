@@ -1,52 +1,44 @@
 import { useState } from 'react';
-import {SafeAreaView, Pressable, StyleSheet, View, Text,TextInput, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
+import {SafeAreaView, Pressable, StyleSheet, View, Text,TextInput,Dimensions, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
 import {MENULIST,transformMenuForSectionList} from '../data/data';
 import { useRoute } from '@react-navigation/native';
-import { Searchbar,SegmentedButtons,List,IconButton  } from 'react-native-paper';
+import { Searchbar,SegmentedButtons,List,IconButton,Portal,Modal,Badge,DataTable  } from 'react-native-paper';
 
 const filterMain = MENULIST.filter(x=>x.category==="MAIN")
 const filterDrink = MENULIST.filter(x=>x.category==="DRINK")
 // const array= [{title:"MAIN",data:filterMain},{title:"DRINK",data:filterDrink}]
 
 
-function SelectedTableDetails() {
-  const route = useRoute();
-  const {selectedTable} = route.params;
-  return (
-    <View>
-      <Text style={{fontSize:30}}>Ordering for Table {selectedTable.name} in the {selectedTable.area} area</Text>
-      {/* You can add more details about the table if needed */}
-    </View>
-  );
-};
+// function SelectedTableDetails() {
+//   const route = useRoute();
+//   const {selectedTable} = route.params;
+//   return (
+//     <View>
+//       <Text style={{fontSize:30}}>Ordering for Table {selectedTable.name} in the {selectedTable.area} area</Text>
+//       {/* You can add more details about the table if needed */}
+//     </View>
+//   );
+// };
 
 function FilterSearch({text,onChange}) {
-
-  // return <TextInput
-  // style={styles.input} 
-  // onChangeText={onChange}
-  // value={text}
-  // placeholder='Enter a menu item name'
-  // maxLength={40}
-  // >
-  // </TextInput>
+  const barWidth = Dimensions.get('window').width /1.5
   return (
     <Searchbar
       placeholder="Search menu"
       onChangeText={onChange}
       value={text}
-      style={{width:300}}
+      style={{width:barWidth}}
     />
   
   );
   
 }
 function FilterCategory({onChange})  {
-  // return <View>
-  //   <Button title='All' onPress={()=>onChange("All")}></Button>
-  //   <Button title='Drink'onPress={()=>onChange("Drink")}></Button>
-  //   <Button title='Main'onPress={()=>onChange("Main")}></Button>
-  // </View>
+  //TO DO: make it dynamic..
+  const buttonList = [
+    {value:"All",label:'All'},
+    {value:"Drink",label:'Drink'},
+    {value:"Main",label:'Main'}]
   const [value, setValue] = useState('');
   return (<SafeAreaView>
     <SegmentedButtons
@@ -54,20 +46,7 @@ function FilterCategory({onChange})  {
       onValueChange={(value)=>{
         onChange(value)
       }}
-      buttons={[
-        {
-          value:'All',
-          label:'All',
-        },
-        {
-          value:'Drink',
-          label:'Drink'
-        },
-        {
-          value:'Main',
-          label:'Main'
-        },
-      ]}
+      buttons={buttonList}
     />
   </SafeAreaView>)
 }
@@ -85,7 +64,7 @@ function SortOrderButton({onChange}) {
     {text:"Price descending",param:"sortDescendPrice"},]
 
   const listSortTypes = sortTypes.map(item=>
-    <View key={item.name}>
+    <View key={item=>item.name}>
       <Pressable onPress={() => handleSelectOption(item.param)}>
         <Text>{item.text}</Text>
       </Pressable>
@@ -111,16 +90,71 @@ function SortOrderButton({onChange}) {
         
       </View>
   );
-
 }
-function FilterAndSortHeader({handleSearch,handleCategory,handleSort}) {
+
+function ShoppingCart({total,itemCount,orderCart,selectedTable}){
+  const [visible, setVisible] = useState(false);
+  const showModal = ()=> {setVisible(true)}
+  const hideModal = ()=> {setVisible(false)}
+  const containerStyle = {backgroundColor: 'white', padding: 20};
+  const currencyFormat = new Intl.NumberFormat('en-AU',{style:'currency', currency:'AUD'})
+  // console.log(total)
+  // console.log(itemCount)
+  // console.log(orderCart)
+  console.log(selectedTable)
+  const productNameWidth = Dimensions.get('window').width /2
+  const orderItems = orderCart.map(item=> {
+    return <View >
+      <View style={{flexDirection:'row',gap:40}}>
+        <Text style={{width:productNameWidth}}>{item.name}</Text>
+        <Text>x{item.quantity}</Text>
+        <Text>{currencyFormat.format(item.price)}</Text>
+        
+      </View>
+      
+    </View>});
+  // const orderItems = orderCart.map(item=>{
+  //     return <DataTable.Row key={item=>item.id}>
+  //       <DataTable.Cell>{item.name}</DataTable.Cell>
+  //       <DataTable.Cell>x {item.quantity}</DataTable.Cell>
+  //       <DataTable.Cell>{currencyFormat.format(item.price)}</DataTable.Cell>
+  //     </DataTable.Row>
+  //   })
+    
+  
+
+  return (
+    <View style={{position:'relative'}}>
+      <Portal>
+        <Modal visible={visible} onDismiss={hideModal}  contentContainerStyle={containerStyle}>
+          <Text style={{fontSize:35}}>Total: {currencyFormat.format(total)}</Text>
+          <Text style={{fontSize:20}}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
+          {/* {orderItems} */}
+            {orderItems}
+          <Button title="Submit"></Button>
+        </Modal>
+      </Portal>
+      {/* <View style={{flexDirection:'row'}}> */}
+        <IconButton icon="cart" onPress={itemCount&&showModal} style={{position:'absolute'}}></IconButton>
+        {itemCount===0?<></>:<Badge>{itemCount}</Badge>}
+        
+      {/* </View> */}
+      
+      
+    </View>
+  );
+}
+
+function FilterAndSortHeader({handleSearch,handleCategory,handleSort,total,itemCount,orderCart,selectedTable}) {
+  //To Do needs to be sticky
   return <View>
-    <SelectedTableDetails></SelectedTableDetails>
+    {/* <SelectedTableDetails></SelectedTableDetails> */}
     <View style={{flexDirection:'row'}}>
       <FilterSearch onChange={handleSearch}></FilterSearch>
       <SortOrderButton onChange={handleSort}></SortOrderButton>
       {/*Geoff ToDo: Add a shopping cart icon, that uses modal to confirm order.. when you click submit it post to the server*/}
       {/* Also button style for each item can change. */}
+      <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} ></ShoppingCart>
     </View>
     <FilterCategory onChange={handleCategory}></FilterCategory>
     
@@ -136,6 +170,7 @@ function MenuList({navigation}){
   const [filterCategory,setFilterCategory] = useState("all") //"All,Drink,Main"
   const [orderCart,setOrderCart] = useState([]) //order items
   //not sure how to store data to share between screens
+  
 
   const data = transformMenuForSectionList(MENULIST,searchText,sortBy,filterCategory)
   
@@ -143,6 +178,10 @@ function MenuList({navigation}){
   const quantity = (id)=>isInCart(id) ?  orderCart.find(x=>x.id===id).quantity:  0
   const total = orderCart.reduce((acc,item)=>{
     acc += item.quantity * item.price
+    return acc
+  },0)
+  const itemCount = orderCart.reduce((acc,item)=> {
+    acc+=item.quantity
     return acc
   },0)
   //TO DO: Style FilterSearch
@@ -201,17 +240,20 @@ function MenuList({navigation}){
     <SectionList sections={data}
       renderItem={renderItem}
       renderSectionHeader={sectionHeader}
-      extraData={quantity}
+      extraData={{quantity,orderCart}}
       keyExtractor={(item,index)=>`${index}+${item.id}`}
-      ListHeaderComponent={<FilterAndSortHeader handleSearch={handleText} handleCategory={handleFilterCategory} handleSort={handleSortBy} />}
-      ListFooterComponent={
-      <Button disabled={orderCart.length===0} title={"View Order"} 
-      onPress={()=>navigation.
-        navigate("New Order",{
-          orderCart: orderCart,
-          total:total,
-          selectedTable: selectedTable
-        })}/>}
+      ListHeaderComponent={
+      <FilterAndSortHeader handleSearch={handleText} 
+      total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable}
+      handleCategory={handleFilterCategory} handleSort={handleSortBy} />}
+      // ListFooterComponent={
+      // <Button disabled={orderCart.length===0} title={"View Order"} 
+      // onPress={()=>navigation.
+      //   navigate("New Order",{
+      //     orderCart: orderCart,
+      //     total:total,
+      //     selectedTable: selectedTable
+      //   })}/>}
     >
     </SectionList >
     {/* <FlatList data={MENULIST}
