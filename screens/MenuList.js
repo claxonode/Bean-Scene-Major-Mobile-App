@@ -1,181 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {SafeAreaView, Pressable, StyleSheet, View, Text,TextInput,Dimensions, FlatList,Button,SectionList,Keyboard ,ScrollView, Alert} from 'react-native';
 import {MENULIST,transformMenuForSectionList} from '../data/data';
 import { useRoute } from '@react-navigation/native';
 import { Searchbar,SegmentedButtons,List,IconButton,Portal,Modal,Badge,DataTable  } from 'react-native-paper';
-
-const filterMain = MENULIST.filter(x=>x.category==="MAIN")
-const filterDrink = MENULIST.filter(x=>x.category==="DRINK")
-// const array= [{title:"MAIN",data:filterMain},{title:"DRINK",data:filterDrink}]
+import { FilterAndSortHeader } from './MenuList_FilterAndSortHeader';
 
 
-// function SelectedTableDetails() {
-//   const route = useRoute();
-//   const {selectedTable} = route.params;
-//   return (
-//     <View>
-//       <Text style={{fontSize:30}}>Ordering for Table {selectedTable.name} in the {selectedTable.area} area</Text>
-//       {/* You can add more details about the table if needed */}
-//     </View>
-//   );
-// };
-
-function FilterSearch({text,onChange}) {
-  const barWidth = Dimensions.get('window').width /1.5
-  return (
-    <Searchbar
-      placeholder="Search menu"
-      onChangeText={onChange}
-      value={text}
-      style={{width:barWidth}}
-    />
-  
-  );
-  
-}
-function FilterCategory({onChange})  {
-  //TO DO: make it dynamic..
-  const buttonList = [
-    {value:"All",label:'All'},
-    {value:"Drink",label:'Drink'},
-    {value:"Main",label:'Main'}]
-  const [value, setValue] = useState('');
-  return (<SafeAreaView>
-    <SegmentedButtons
-      value={value}
-      onValueChange={(value)=>{
-        onChange(value)
-      }}
-      buttons={buttonList}
-    />
-  </SafeAreaView>)
-}
-function SortOrderButton({onChange}) {
-  const [expand,setExpand] = useState(false)
-  const handleExpand = ()=> setExpand(!expand)
-  const handleSelectOption = (sortParam)=> {
-    onChange(sortParam)
-    handleExpand()
-  }
-  const sortTypes = [
-    {text:"Name ascending",param:"sortAscendName"},
-    {text:"Name descending",param:"sortDescendName"},
-    {text:"Price ascending",param:"sortAscendPrice"},
-    {text:"Price descending",param:"sortDescendPrice"},]
-
-  const listSortTypes = sortTypes.map(item=>
-    <View key={item=>item.name}>
-      <Pressable onPress={() => handleSelectOption(item.param)}>
-        <Text>{item.text}</Text>
-      </Pressable>
-    </View>
-    )
-  return (
-    // <IconButton icon="sort" size={30} onPress={handlePress}>
-      <View style={{flexDirection:'column',position:'relative'}}>
-        <View>
-          <IconButton icon="sort" size={30} onPress={handleExpand}></IconButton>
-        </View>
-        {expand===true
-        ? 
-        <View style={
-          {flexDirection:'column',
-          position:'absolute',right:60, width:'250%',bottom:5, backgroundColor:'white',zIndex:1,
-          borderWidth: 3, borderRadius:4,
-          }
-          }>
-            {listSortTypes}
-        </View>
-        :<></>}
-        
-      </View>
-  );
-}
-
-function ShoppingCart({total,itemCount,orderCart,selectedTable}){
-  const [visible, setVisible] = useState(false);
-  const showModal = ()=> {setVisible(true)}
-  const hideModal = ()=> {setVisible(false)}
-  const containerStyle = {backgroundColor: 'white', padding: 20};
-  const currencyFormat = new Intl.NumberFormat('en-AU',{style:'currency', currency:'AUD'})
-  // console.log(total)
-  // console.log(itemCount)
-  // console.log(orderCart)
-  console.log(selectedTable)
-  const productNameWidth = Dimensions.get('window').width /2
-  const orderItems = orderCart.map(item=> {
-    return <View >
-      <View style={{flexDirection:'row',gap:40}}>
-        <Text style={{width:productNameWidth}}>{item.name}</Text>
-        <Text>x{item.quantity}</Text>
-        <Text>{currencyFormat.format(item.price)}</Text>
-        
-      </View>
-      
-    </View>});
-  // const orderItems = orderCart.map(item=>{
-  //     return <DataTable.Row key={item=>item.id}>
-  //       <DataTable.Cell>{item.name}</DataTable.Cell>
-  //       <DataTable.Cell>x {item.quantity}</DataTable.Cell>
-  //       <DataTable.Cell>{currencyFormat.format(item.price)}</DataTable.Cell>
-  //     </DataTable.Row>
-  //   })
-    
-  
-
-  return (
-    <View style={{position:'relative'}}>
-      <Portal>
-        <Modal visible={visible} onDismiss={hideModal}  contentContainerStyle={containerStyle}>
-          <Text style={{fontSize:35}}>Total: {currencyFormat.format(total)}</Text>
-          <Text style={{fontSize:20}}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
-          {/* {orderItems} */}
-            {orderItems}
-          <Button title="Submit"></Button>
-        </Modal>
-      </Portal>
-      {/* <View style={{flexDirection:'row'}}> */}
-        <IconButton icon="cart" onPress={itemCount&&showModal} style={{position:'absolute'}}></IconButton>
-        {itemCount===0?<></>:<Badge>{itemCount}</Badge>}
-        
-      {/* </View> */}
-      
-      
-    </View>
-  );
-}
-
-function FilterAndSortHeader({handleSearch,handleCategory,handleSort,total,itemCount,orderCart,selectedTable}) {
-  //To Do needs to be sticky
-  return <View>
-    {/* <SelectedTableDetails></SelectedTableDetails> */}
-    <View style={{flexDirection:'row'}}>
-      <FilterSearch onChange={handleSearch}></FilterSearch>
-      <SortOrderButton onChange={handleSort}></SortOrderButton>
-      {/*Geoff ToDo: Add a shopping cart icon, that uses modal to confirm order.. when you click submit it post to the server*/}
-      {/* Also button style for each item can change. */}
-      <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} ></ShoppingCart>
-    </View>
-    <FilterCategory onChange={handleCategory}></FilterCategory>
-    
-  </View>
-}
+import { getAllMenuItemsByCategoryQueryable } from '../services/MenuApiService';
+import AustralianCurrency from '../services/CurrencyFormat'
 
 function MenuList({navigation}){
   const route = useRoute();
   const { selectedTable } = route.params;
 
   const [searchText,setSearchText] = useState("")
-  const [sortBy,setSortBy] = useState("sortDescendPrice")  //sortAscendName,sortDescendName,sortAscendPrice,sortDescendPrice
-  const [filterCategory,setFilterCategory] = useState("all") //"All,Drink,Main"
+  const [sortBy,setSortBy] = useState("pricedes")  //nameasc,namedes,priceasc,pricedes
+  const [filterCategory,setFilterCategory] = useState("All") //"All,Drink,Main"
+  
   const [orderCart,setOrderCart] = useState([]) //order items
-  //not sure how to store data to share between screens
+  const [menuItems,setMenuItems] = useState([])
   
+  useEffect(()=>{
+    async function fetchData() {
+      try {
+        const menuData = await getAllMenuItemsByCategoryQueryable(filterCategory,sortBy,searchText);
+        setMenuItems(menuData);
+      } catch (error) {
+        console.error("Error fetching menu:",error)
+      }
+    }fetchData()
+  },[searchText,sortBy,filterCategory])
 
-  const data = transformMenuForSectionList(MENULIST,searchText,sortBy,filterCategory)
-  
-  const isInCart = (id)=>orderCart.some(x=>x.id===id)
-  const quantity = (id)=>isInCart(id) ?  orderCart.find(x=>x.id===id).quantity:  0
+  const isInCart = (id)=>orderCart.some(x=>x.id===id )
+  const quantity = (id)=>isInCart(id) ?  orderCart.find(x=>x.id===(id)).quantity:  0
+
   const total = orderCart.reduce((acc,item)=>{
     acc += item.quantity * item.price
     return acc
@@ -184,12 +42,11 @@ function MenuList({navigation}){
     acc+=item.quantity
     return acc
   },0)
-  //TO DO: Style FilterSearch
-  //TO DO: add <CreateOrder> at SectionList's ListFooterComponent
 
-  const renderItem = ({item})=>{
+
+  const menuItem = ({item})=>{
     return <MenuItem item={item} inCart={isInCart} onPress={()=>handleAddToCart(item)} 
-    handleIncrease={handleIncrease} handleDecrease={handleDecrease} quantity={quantity(item._id)}
+    handleIncrease={handleIncrease} handleDecrease={handleDecrease} quantity={quantity(item.id)}
     handleRemove={handleRemoveFromCart}
     ></MenuItem>}
   const sectionHeader = ({section}) => {return <MenuHeader section={section}/>}
@@ -204,7 +61,7 @@ function MenuList({navigation}){
     setSortBy(text)
   }
   function handleAddToCart(item) {
-    setOrderCart([...orderCart,{id:item._id,name:item.name,price:item.price,quantity:1,}])
+    setOrderCart([...orderCart,{id:item.id,name:item.name,price:item.price,quantity:1,}])
   }
   function handleRemoveFromCart(id) {
     setOrderCart(orderCart.filter(x=>x.id !== id))
@@ -212,7 +69,6 @@ function MenuList({navigation}){
   function handleIncrease(id) {
     setOrderCart(orderCart.map(item=>{
       if (item.id===id) {
-        // item.data.quantity++
         return {
           ...item,quantity: item.quantity + 1
         }
@@ -236,16 +92,17 @@ function MenuList({navigation}){
     }));
   }
     return <View style={styles.mainContainer} >
-
-    <SectionList sections={data}
-      renderItem={renderItem}
+      <SafeAreaView>
+      <SectionList sections={menuItems}
+      renderItem={menuItem}
       renderSectionHeader={sectionHeader}
       extraData={{quantity,orderCart}}
-      keyExtractor={(item,index)=>`${index}+${item.id}`}
+      keyExtractor={(item)=>item.id}
       ListHeaderComponent={
       <FilterAndSortHeader handleSearch={handleText} 
       total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable}
-      handleCategory={handleFilterCategory} handleSort={handleSortBy} />}
+      currentFilter={filterCategory} handleCategory={handleFilterCategory} 
+      handleSort={handleSortBy} />}
       // ListFooterComponent={
       // <Button disabled={orderCart.length===0} title={"View Order"} 
       // onPress={()=>navigation.
@@ -256,45 +113,30 @@ function MenuList({navigation}){
       //   })}/>}
     >
     </SectionList >
-    {/* <FlatList data={MENULIST}
-    renderItem={renderItem}
-    extraData={quantity}
-    keyExtractor={item=>item._id}
-    ListFooterComponent={<Button disabled={orderCart.length===0} title={"View Order"} 
-    onPress={()=>navigation.
-      navigate("New Order",{
-        orderCart: orderCart,
-        total:total
-      })}/>}
-    >
-    </FlatList> */}
+      </SafeAreaView>
 
     </View>
       
 }
-// <FilterSearch onChange={handleText}/>
-//<FilterCategory onChange={handleFilterCategory}/>
-//<SortOrderButton onChange={handleSortBy}></SortOrderButton>
 
 function MenuItem({item,onPress,inCart,handleIncrease,handleDecrease,handleRemove,quantity}) {
-  const price = new Intl.NumberFormat('en-AU',{style:'currency', currency:'AUD'}).format(item.price);
-  return (<View style={styles.item}>
-    {/* <Pressable></Pressable> */}
+
+  return (<View style={styles.menuItem}>
     <View>
       <Text>{item.name}</Text>
       <Text>{item.description}</Text>
-      <Text>Price: {price}</Text>
-      {inCart(item._id)
+      <Text>Price: {AustralianCurrency(item.price)}</Text>
+      {inCart(item.id)
       ?<View>
         <Text>Quantity: {quantity}</Text>
-        <Button title="Increase" onPress={()=>{handleIncrease(item._id)}}></Button>
-        <Button disabled={quantity===1} title="Decrease" onPress={()=>{handleDecrease(item._id)}}></Button>
-        <Button disabled={!inCart(item._id)} title="Remove" onPress={()=>
+        <Button title="Increase" onPress={()=>{handleIncrease(item.id)}}></Button>
+        <Button disabled={quantity===1} title="Decrease" onPress={()=>{handleDecrease(item.id)}}></Button>
+        <Button disabled={!inCart(item.id)} title="Remove" onPress={()=>
           // {handleRemove(item._id)}
           Alert.alert(`Are you sure you want to remove \n${item.name} x${quantity}?`,'',[
             {
               text:"Yes",
-              onPress:()=>handleRemove(item._id)
+              onPress:()=>handleRemove(item.id)
             },
             {
               text:"No",
@@ -303,7 +145,7 @@ function MenuItem({item,onPress,inCart,handleIncrease,handleDecrease,handleRemov
           ])
           } />
       </View>
-      :<Button title={inCart(item._id)?"In cart":"Add To Cart"} onPress={()=>onPress(item)}></Button>
+      :<Button title={inCart(item.id)?"In cart":"Add To Cart"} onPress={()=>onPress(item)}></Button>
       }
       {/* <Text>Quantity: {quantity}</Text>
       <Button title="Increase" onPress={()=>{handleIncrease(item._id)}}></Button>
@@ -334,7 +176,7 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
     },
-    item: {
+    menuItem: {
       flex: 1,
       padding: 10,
       margin: 10,
@@ -359,6 +201,12 @@ const styles = StyleSheet.create({
     sortOption: {
       height:50,
       width:50,
+    },
+    orderByBox: {
+      flexDirection:'column',
+      position:'absolute',right:60, width:'250%',top:5, backgroundColor:'white',zIndex:1,
+      borderWidth: 3, borderRadius:4,
+          
     }
   });
 
