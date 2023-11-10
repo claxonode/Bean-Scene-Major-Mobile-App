@@ -1,10 +1,12 @@
 import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge } from 'react-native-paper';
-import { View, SafeAreaView, Pressable, Text,Dimensions,StyleSheet,Button } from 'react-native';
+import { View, SafeAreaView, Pressable, Text,Dimensions,StyleSheet,Button,Alert } from 'react-native';
 import {useState } from 'react';
+import {useNavigation} from '@react-navigation/native';
 import AustralianCurrency from '../services/CurrencyFormat'
+import {postNewOrder} from '../services/OrderApiService'
+
 
 function FilterSearch({ text, onChange }) {
-
     return (
         <Searchbar
             placeholder="Search menu"
@@ -61,18 +63,17 @@ function SortOrderButton({ onChange }) {
             <View>
                 <IconButton icon="sort" size={30} onPress={handleExpand}></IconButton>
             </View>
-            {expand === true
-                ?
+            {expand === true &&
                 <View style={styles.sortOrderByPopup}>
                     {listSortTypes}
                 </View>
-                : <></>}
-
+            }
         </View>
     );
 }
 
-function ShoppingCart({ total, itemCount, orderCart, selectedTable }) {
+function ShoppingCart({ total, itemCount, orderCart, selectedTable}) {
+    const navigation = useNavigation();
     const [visible, setVisible] = useState(false);
     const showModal = () => { setVisible(true) }
     const hideModal = () => { setVisible(false) }
@@ -86,6 +87,25 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable }) {
             </View>
         </View>
     });
+    const handleSubmission = async()=> {
+        let post = {
+            tableNumber: selectedTable.name,
+            orderItems: orderCart,
+            orderStatus: "PENDING"
+        }
+        postNewOrder(post).then((data)=> {
+            hideModal()
+            Alert.alert(`Created order `, '', [
+                {
+                  text: "Ok",
+                  onPress: () => navigation.navigate("Home")
+                },
+            ])
+        }).catch((error)=> {
+            Alert.alert(`${error}`+" could not create order")
+        })
+        
+    }
 
     return (
         <View style={styles.shoppingCartView}>
@@ -94,12 +114,12 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable }) {
                     <Text style={styles.modalHeader}>Total: {AustralianCurrency(total)}</Text>
                     <Text style={styles.modalSubHeader}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
                     {orderItems}
-                    <Button title="Submit"></Button>
+                    <Button title="Submit" onPress={handleSubmission}></Button>
                 </Modal>
             </Portal>
             {/* <View style={{flexDirection:'row'}}> */}
             <IconButton icon="cart" onPress={itemCount && showModal} style={styles.shoppingCartIcon}></IconButton>
-            {itemCount === 0 ? <></> : <Badge>{itemCount}</Badge>}
+            {itemCount !== 0 && <Badge>{itemCount}</Badge>}
 
         </View>
     );
