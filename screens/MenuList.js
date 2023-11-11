@@ -7,19 +7,21 @@ import { FilterAndSortHeader } from './MenuList_FilterAndSortHeader';
 
 
 import { getAllMenuItemsByCategoryQueryable } from '../services/MenuApiService';
-import AustralianCurrency from '../services/CurrencyFormat'
+import { AustralianCurrency } from '../services/FormatService'
 
 
-function MenuList() {
-  const route = useRoute();
-  const { selectedTable } = route.params;
 
+function MenuList({selectedTable,existingOrder}) {
+  // console.log(selectedTable)
+  // console.log(existingOrder)
   const [searchText, setSearchText] = useState("")
   const [sortBy, setSortBy] = useState("pricedes")  //nameasc,namedes,priceasc,pricedes
   const [filterCategory, setFilterCategory] = useState("All") //"All,Drink,Main"
 
-  const [orderCart, setOrderCart] = useState([]) //order items
+  // 
+  const [orderCart, setOrderCart] = useState(existingOrder===null?[]:existingOrder.orderItems) //order items
   const [menuItems, setMenuItems] = useState([])
+
 
   useEffect(() => {
     async function fetchData() {
@@ -31,10 +33,12 @@ function MenuList() {
       }
     } fetchData()
   }, [searchText, sortBy, filterCategory])
-
-  const isInCart = (id) => orderCart.some(x => x.id === id)
-  const quantity = (id) => isInCart(id) ? orderCart.find(x => x.id === (id)).quantity : 0
-
+  console.log("Check cart")
+  
+  console.log(menuItems.find(x => x.name === "Strawberry Milkshake"))
+  const isInCart = (name) => orderCart.some(x => x.name === name)
+  const quantity = (name)=>isInCart(name) ?  orderCart.find(x=>x.name===name).quantity:  0
+  // console.log(isInCart())
   const total = orderCart.reduce((acc, item) => {
     acc += item.quantity * item.price
     return acc
@@ -47,7 +51,7 @@ function MenuList() {
 
   const menuItem = ({ item }) => {
     return <MenuItem item={item} inCart={isInCart} onPress={() => handleAddToCart(item)}
-      handleIncrease={handleIncrease} handleDecrease={handleDecrease} quantity={quantity(item.id)}
+      handleIncrease={handleIncrease} handleDecrease={handleDecrease} quantity={quantity(item.name)}
       handleRemove={handleRemoveFromCart}
     ></MenuItem>
   }
@@ -63,14 +67,14 @@ function MenuList() {
     setSortBy(text)
   }
   function handleAddToCart(item) {
-    setOrderCart([...orderCart, { id: item.id, name: item.name, price: item.price, quantity: 1, }])
+    setOrderCart([...orderCart, { name: item.name, price: item.price, quantity: 1, }])
   }
-  function handleRemoveFromCart(id) {
-    setOrderCart(orderCart.filter(x => x.id !== id))
+  function handleRemoveFromCart(name) {
+    setOrderCart(orderCart.filter(x => x.name !== name))
   }
-  function handleIncrease(id) {
+  function handleIncrease(name) {
     setOrderCart(orderCart.map(item => {
-      if (item.id === id) {
+      if (item.name === name) {
         return {
           ...item, quantity: item.quantity + 1
         }
@@ -80,9 +84,9 @@ function MenuList() {
       }
     }))
   }
-  function handleDecrease(id) {
+  function handleDecrease(name) {
     setOrderCart(orderCart.map(item => {
-      if (item.id === id) {
+      if (item.name === name) {
         return {
           ...item,
           quantity: item.quantity - 1
@@ -93,52 +97,50 @@ function MenuList() {
       }
     }));
   }
-  return <View style={styles.mainContainer} >
-    <SafeAreaView>
-      <SectionList sections={menuItems}
-        renderItem={menuItem}
-        renderSectionHeader={sectionHeader}
-        extraData={{ quantity, orderCart }}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <FilterAndSortHeader handleSearch={handleText}
-            total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable}
-            currentFilter={filterCategory} handleCategory={handleFilterCategory}
-            handleSort={handleSortBy} />}
-      // ListFooterComponent={
-      // <Button disabled={orderCart.length===0} title={"View Order"} 
-      // onPress={()=>navigation.
-      //   navigate("New Order",{
-      //     orderCart: orderCart,
-      //     total:total,
-      //     selectedTable: selectedTable
-      //   })}/>}
-      >
-      </SectionList >
-    </SafeAreaView>
+  return <SafeAreaView style={styles.mainContainer}>
+    <SectionList sections={menuItems}
+      renderItem={menuItem}
+      renderSectionHeader={sectionHeader}
+      extraData={{ quantity, orderCart }}
+      keyExtractor={(item) => item.name}
+      ListHeaderComponent={
+        <FilterAndSortHeader
+          handleSearch={handleText}
+          total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder}
+          handleCategory={handleFilterCategory}
+          handleSort={handleSortBy} />}
+    // ListFooterComponent={
+    // <Button disabled={orderCart.length===0} title={"View Order"} 
+    // onPress={()=>navigation.
+    //   navigate("New Order",{
+    //     orderCart: orderCart,
+    //     total:total,
+    //     selectedTable: selectedTable
+    //   })}/>}
+    >
+    </SectionList >
+  </SafeAreaView>
 
-  </View>
 
 }
 
-function MenuItem({ item, onPress, inCart, handleIncrease, handleDecrease, handleRemove, quantity }) {
-
+function MenuItem({ item, onPress, inCart, quantity, handleIncrease, handleDecrease, handleRemove }) {
   return (<View style={styles.menuItem}>
     <View>
       <Text>{item.name}</Text>
       <Text>{item.description}</Text>
       <Text>Price: {AustralianCurrency(item.price)}</Text>
-      {inCart(item.id)
+      {inCart(item.name)
         ? <View>
           <Text>Quantity: {quantity}</Text>
-          <Button title="Increase" onPress={() => { handleIncrease(item.id) }}></Button>
-          <Button disabled={quantity === 1} title="Decrease" onPress={() => { handleDecrease(item.id) }}></Button>
-          <Button disabled={!inCart(item.id)} title="Remove" onPress={() =>
+          <Button title="Increase" onPress={() => { handleIncrease(item.name) }}></Button>
+          <Button disabled={quantity === 1} title="Decrease" onPress={() => { handleDecrease(item.name) }}></Button>
+          <Button disabled={!inCart(item.name)} title="Remove" onPress={() =>
             // {handleRemove(item._id)}
             Alert.alert(`Are you sure you want to remove \n${item.name} x${quantity}?`, '', [
               {
                 text: "Yes",
-                onPress: () => handleRemove(item.id)
+                onPress: () => handleRemove(item.name)
               },
               {
                 text: "No",
@@ -147,8 +149,10 @@ function MenuItem({ item, onPress, inCart, handleIncrease, handleDecrease, handl
             ])
           } />
         </View>
-        : <Button title={inCart(item.id) ? "In cart" : "Add To Cart"} onPress={() => onPress(item)}></Button>
+        : <Button title={inCart(item.name) ? "In cart" : "Add To Cart"} onPress={() => {onPress(item) }}>
+        </Button>
       }
+
       {/* <Text>Quantity: {quantity}</Text>
       <Button title="Increase" onPress={()=>{handleIncrease(item._id)}}></Button>
       <Button disabled={quantity===1} title="Decrease" onPress={()=>{handleDecrease(item._id)}}></Button>

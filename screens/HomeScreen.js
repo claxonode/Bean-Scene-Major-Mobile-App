@@ -10,6 +10,7 @@ function HomeScreen({ navigation }) {
         title="Go to Table Selection"
         onPress={() => navigation.navigate('Tables')}
       />
+      <Button title="See all orders" onPress={()=>navigation.navigate('Orders')} />
       <Button title="Sign out" onPress={signOut} />
     </View>
   );

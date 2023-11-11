@@ -16,7 +16,7 @@ export default function TableSelection() {
     // Handle the selected table
     console.log('Selected table:', selectedTable);
     // Add your logic for handling the selected table
-    navigation.navigate('MenuList', {name:`Create Order at Table ${selectedTable.name}`, selectedTable });
+    navigation.navigate('Create', {name:`Create Order at Table ${selectedTable.name}`, selectedTable });
   };
 
   useEffect(() => {

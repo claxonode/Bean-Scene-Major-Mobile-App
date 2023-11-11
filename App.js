@@ -8,12 +8,13 @@ import { name as appName } from './app.json';
 import { AppRegistry } from 'react-native';
 
 ///Screens
-import MenuList from './screens/MenuList'
-import OrderList from './screens/CreateOrder'
+// import MenuList from './screens/MenuList'
+import CreateScreen from './screens/CreateOrderScreen'
 import TableSelection from './screens/TableSelection';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
-
+import OrdersScreen from './screens/OrdersScreen'
+import EditOrderScreen from './screens/EditOrderScreen'
 
 //Services
 import { AuthContext } from './services/AuthContext';
@@ -110,8 +111,11 @@ function App({ navigation }) {
               {/* <Stack.Screen name="Debug" component={DebugLoginScreen}/> */}
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Tables" component={TableSelection}/>
-              <Stack.Screen name='MenuList' component={MenuList} options={({route})=>({title:route.params.name})} />
-              <Stack.Screen name='New Order' component={OrderList}/>
+              <Stack.Screen name="Create" component={CreateScreen} options={({route})=>({title:route.params.name})} />
+              {/* <Stack.Screen name='MenuList' component={MenuList} options={({route})=>({title:route.params.name})} /> */}
+              {/* <Stack.Screen name='New Order' component={OrderList}/> */}
+              <Stack.Screen name='Orders' component={OrdersScreen} />
+              <Stack.Screen name="UpdateOrder" component={EditOrderScreen} options={({route})=>({title:route.params.name})}  />
             </>
           )}
         </Stack.Navigator>

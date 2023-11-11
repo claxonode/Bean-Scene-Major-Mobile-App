@@ -1,18 +1,23 @@
-import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge } from 'react-native-paper';
-import { View, SafeAreaView, Pressable, Text,Dimensions,StyleSheet,Button,Alert } from 'react-native';
-import {useState } from 'react';
-import {useNavigation} from '@react-navigation/native';
-import AustralianCurrency from '../services/CurrencyFormat'
-import {postNewOrder} from '../services/OrderApiService'
+import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge, TextInput } from 'react-native-paper';
+import { View, SafeAreaView, Pressable, Text, Dimensions, StyleSheet, Button, Alert } from 'react-native';
+import { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { AustralianCurrency } from '../services/FormatService'
+import { postNewOrder,updateOrder } from '../services/OrderApiService'
 
 
-function FilterSearch({ text, onChange }) {
+function FilterSearch({ onChange }) {
+    const [query, setQuery] = useState('')
     return (
         <Searchbar
             placeholder="Search menu"
-            onChangeText={onChange}
-            value={text}
+            onChangeText={(text) => {
+                setQuery(text)
+                onChange(text)
+            }}
+            value={query}
             style={styles.filterTextInputBox}
+
         />
     );
 }
@@ -44,7 +49,6 @@ function SortOrderButton({ onChange }) {
         onChange(sortParam)
         handleExpand()
     }
-    //key not working here??
     const sortTypes = [
         { text: "Name ascending", param: "nameasc" },  //nameasc,namedes,priceasc,pricedes
         { text: "Name descending", param: "namedes" },
@@ -72,39 +76,58 @@ function SortOrderButton({ onChange }) {
     );
 }
 
-function ShoppingCart({ total, itemCount, orderCart, selectedTable}) {
+function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrder }) {
     const navigation = useNavigation();
     const [visible, setVisible] = useState(false);
+    const [notes, setNotes] = useState('')
     const showModal = () => { setVisible(true) }
     const hideModal = () => { setVisible(false) }
 
-    const orderItems = orderCart.map((item,index) => {
+    const orderItems = orderCart.map((item, index) => {
         return <View key={`${item.id}_cart_${index}`}>
-            <View  style={{ flexDirection: 'row', gap: 40 }}>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
                 <Text style={styles.shoppingCartOrderItemsName}>{item.name}</Text>
-                <Text>x{item.quantity}</Text>
-                <Text>{AustralianCurrency(item.price)}</Text>
+                <Text style={styles.shoppingCartQuantity}>x{item.quantity}</Text>
+                <Text style={styles.shoppingCartCurrency}>{AustralianCurrency(item.price)}</Text>
             </View>
         </View>
     });
-    const handleSubmission = async()=> {
-        let post = {
+    const handleSubmission = async (existingOrder) => {
+        console.log(existingOrder)
+        let jsonData = {
             tableNumber: selectedTable.name,
             orderItems: orderCart,
-            orderStatus: "PENDING"
+            orderStatus: "PENDING",
+            notes: notes
         }
-        postNewOrder(post).then((data)=> {
-            hideModal()
-            Alert.alert(`Created order `, '', [
-                {
-                  text: "Ok",
-                  onPress: () => navigation.navigate("Home")
-                },
-            ])
-        }).catch((error)=> {
-            Alert.alert(`${error}`+" could not create order")
-        })
-        
+        if (existingOrder !== null) {
+            // updateOrder(jsonData).then((data) => {
+            //     hideModal()
+            //     Alert.alert(`Created order `, '', [
+            //         {
+            //             text: "Ok",
+            //             onPress: () => navigation.navigate("Home")
+            //         },
+            //     ])
+            // }).catch((error) => {
+            //     Alert.alert(`${error}` + " could not create order")
+            // })
+            //ToDo
+            console.log('hi')
+        }
+        if (existingOrder===null) {
+            postNewOrder(jsonData).then((data) => {
+                hideModal()
+                Alert.alert(`Created order `, '', [
+                    {
+                        text: "Ok",
+                        onPress: () => navigation.navigate("Home")
+                    },
+                ])
+            }).catch((error) => {
+                Alert.alert(`${error}` + " could not create order")
+            })
+        }
     }
 
     return (
@@ -114,7 +137,8 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable}) {
                     <Text style={styles.modalHeader}>Total: {AustralianCurrency(total)}</Text>
                     <Text style={styles.modalSubHeader}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
                     {orderItems}
-                    <Button title="Submit" onPress={handleSubmission}></Button>
+                    <TextInput label="Additional Notes" value={notes} onChangeText={setNotes} multiline={true} maxLength={250}></TextInput>
+                    <Button title="Submit" onPress={() => handleSubmission(existingOrder)}></Button>
                 </Modal>
             </Portal>
             {/* <View style={{flexDirection:'row'}}> */}
@@ -125,16 +149,18 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable}) {
     );
 }
 
-export function FilterAndSortHeader({ handleSearch, currentFilter, handleCategory, handleSort, total, itemCount, orderCart, selectedTable }) {
+
+export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, total, itemCount, orderCart, selectedTable, existingOrder }) {
     //To Do needs to be sticky
     return <View>
         {/* <SelectedTableDetails></SelectedTableDetails> */}
         <View style={{ flexDirection: 'row' }}>
-            <FilterSearch onChange={handleSearch} currentFilter={currentFilter}></FilterSearch>
+            <FilterSearch onChange={handleSearch} >
+            </FilterSearch>
             <SortOrderButton onChange={handleSort}></SortOrderButton>
             {/*Geoff ToDo: Add a shopping cart icon, that uses modal to confirm order.. when you click submit it post to the server*/}
             {/* Also button style for each item can change. */}
-            <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} ></ShoppingCart>
+            <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} ></ShoppingCart>
         </View>
         <FilterCategory onChange={handleCategory}></FilterCategory>
 
@@ -150,7 +176,7 @@ const styles = StyleSheet.create({
         fontSize: 20
     },
     modalBoxContainer: {
-        backgroundColor: 'white', padding: 20 
+        backgroundColor: 'white', padding: 20
     },
     shoppingCartView: {
         position: 'relative'
@@ -158,23 +184,33 @@ const styles = StyleSheet.create({
     shoppingCartIcon: {
         position: 'absolute'
     },
-    shoppingCartOrderItemsName: {
-        width: screenWidth/2
+    // shoppingCartOrderItemsName: {
+    //     flex:1
+    // },
+    // shoppingCartQuantity: {
+    //     flex:1
+    // },
+    // shoppingCartCurrency: {
+    //     flex:1
+    // },
+    shoppingCartComment: {
+        // position:'absolute',
+        bottom: 12
     },
     sortOrderByPopup: {
-        flexDirection:'column',
-        position:'absolute',
-        right:60, width:'250%',top:5, 
-        backgroundColor:'white',zIndex:1,
-        borderWidth: 3, borderRadius:4,
-          
+        flexDirection: 'column',
+        position: 'absolute',
+        right: 60, width: '250%', top: 5,
+        backgroundColor: 'white', zIndex: 1,
+        borderWidth: 3, borderRadius: 4,
+
     },
     sortOrderByContainer: {
-        flexDirection: 'column', 
+        flexDirection: 'column',
         position: 'relative'
     },
     filterTextInputBox: {
-        width: screenWidth/1.5
+        width: screenWidth / 1.5
     }
 });
 
