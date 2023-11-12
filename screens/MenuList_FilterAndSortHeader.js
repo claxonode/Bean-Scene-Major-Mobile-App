@@ -42,7 +42,7 @@ function FilterCategory({ onChange }) {
 }
 
 
-function SortOrderButton({ onChange }) {
+function SortMenuItemsButton({ onChange }) {
     const [expand, setExpand] = useState(false)
     const handleExpand = () => setExpand(!expand)
     const handleSelectOption = (sortParam) => {
@@ -79,7 +79,7 @@ function SortOrderButton({ onChange }) {
 function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrder }) {
     const navigation = useNavigation();
     const [visible, setVisible] = useState(false);
-    const [notes, setNotes] = useState('')
+    const [notes, setNotes] = useState(existingOrder===null?"":existingOrder.notes)
     const showModal = () => { setVisible(true) }
     const hideModal = () => { setVisible(false) }
 
@@ -90,10 +90,10 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
                 <Text style={styles.shoppingCartQuantity}>x{item.quantity}</Text>
                 <Text style={styles.shoppingCartCurrency}>{AustralianCurrency(item.price)}</Text>
             </View>
+            {item.note && <Text>&#10148;Notes: {item.note}</Text>}
         </View>
     });
     const handleSubmission = async (existingOrder) => {
-        console.log(existingOrder)
         let jsonData = {
             tableNumber: selectedTable.name,
             orderItems: orderCart,
@@ -101,24 +101,23 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
             notes: notes
         }
         if (existingOrder !== null) {
-            // updateOrder(jsonData).then((data) => {
-            //     hideModal()
-            //     Alert.alert(`Created order `, '', [
-            //         {
-            //             text: "Ok",
-            //             onPress: () => navigation.navigate("Home")
-            //         },
-            //     ])
-            // }).catch((error) => {
-            //     Alert.alert(`${error}` + " could not create order")
-            // })
-            //ToDo
-            console.log('hi')
+            jsonData["orderId"] = existingOrder.orderId
+            updateOrder(jsonData).then((data) => {
+                hideModal()
+                Alert.alert(`Updated order at ${jsonData.tableNumber}`, '', [
+                    {
+                        text: "Ok",
+                        onPress: () => navigation.navigate("Home")
+                    },
+                ])
+            }).catch((error) => {
+                Alert.alert(`${error}` + " could not update order")
+            })
         }
         if (existingOrder===null) {
             postNewOrder(jsonData).then((data) => {
                 hideModal()
-                Alert.alert(`Created order `, '', [
+                Alert.alert(`Created order at ${jsonData.tableNumber}`, '', [
                     {
                         text: "Ok",
                         onPress: () => navigation.navigate("Home")
@@ -157,7 +156,7 @@ export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, 
         <View style={{ flexDirection: 'row' }}>
             <FilterSearch onChange={handleSearch} >
             </FilterSearch>
-            <SortOrderButton onChange={handleSort}></SortOrderButton>
+            <SortMenuItemsButton onChange={handleSort}></SortMenuItemsButton>
             {/*Geoff ToDo: Add a shopping cart icon, that uses modal to confirm order.. when you click submit it post to the server*/}
             {/* Also button style for each item can change. */}
             <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} ></ShoppingCart>

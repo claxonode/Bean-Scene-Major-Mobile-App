@@ -23,9 +23,28 @@ export async function postNewOrder(order) {
         throw error;
       }
 }
-export async function update(order) {
-  //ToDO
+export async function updateOrder(order) {
+    const finalUrl = new URL('api/Orders',BASE_URL)
+    const token = await getToken();
+    try {
+      const response = await fetch(finalUrl,{
+        method:"PUT",
+        headers: {
+          "Authorization":`Bearer ${token}`,
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify(order)
+      });
+      if (response.ok) {
+        return response;
+      }
+      throw new Error(`${response.status}`)
+    } catch (error) {
+        console.log("There has been a problem with your fetch operation: "+error.message)
+        throw error;
+      }
 }
+
 
 export async function getOrders() {
     const finalUrl = new URL('api/orders/', BASE_URL)

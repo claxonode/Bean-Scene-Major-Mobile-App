@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { SafeAreaView, Pressable, StyleSheet, View, Text, TextInput, Dimensions, FlatList, Button, SectionList, Keyboard, ScrollView, Alert } from 'react-native';
+import { SafeAreaView, Pressable, StyleSheet, View, Text, Dimensions, FlatList, Button, SectionList, Keyboard, ScrollView, Alert } from 'react-native';
 import { MENULIST, transformMenuForSectionList } from '../data/data';
 import { useRoute } from '@react-navigation/native';
-import { Searchbar, SegmentedButtons, List, IconButton, Portal, Modal, Badge, DataTable } from 'react-native-paper';
+import { Searchbar, SegmentedButtons, List, IconButton, Portal, Modal, Badge, DataTable,TextInput} from 'react-native-paper';
 import { FilterAndSortHeader } from './MenuList_FilterAndSortHeader';
 
 
@@ -12,8 +12,7 @@ import { AustralianCurrency } from '../services/FormatService'
 
 
 function MenuList({selectedTable,existingOrder}) {
-  // console.log(selectedTable)
-  // console.log(existingOrder)
+
   const [searchText, setSearchText] = useState("")
   const [sortBy, setSortBy] = useState("pricedes")  //nameasc,namedes,priceasc,pricedes
   const [filterCategory, setFilterCategory] = useState("All") //"All,Drink,Main"
@@ -33,12 +32,10 @@ function MenuList({selectedTable,existingOrder}) {
       }
     } fetchData()
   }, [searchText, sortBy, filterCategory])
-  console.log("Check cart")
-  
-  console.log(menuItems.find(x => x.name === "Strawberry Milkshake"))
   const isInCart = (name) => orderCart.some(x => x.name === name)
   const quantity = (name)=>isInCart(name) ?  orderCart.find(x=>x.name===name).quantity:  0
-  // console.log(isInCart())
+  const cartItemNote = (name)=> isInCart(name) ? orderCart.find(x=>x.name===name).note : ""
+
   const total = orderCart.reduce((acc, item) => {
     acc += item.quantity * item.price
     return acc
@@ -50,9 +47,10 @@ function MenuList({selectedTable,existingOrder}) {
 
 
   const menuItem = ({ item }) => {
-    return <MenuItem item={item} inCart={isInCart} onPress={() => handleAddToCart(item)}
-      handleIncrease={handleIncrease} handleDecrease={handleDecrease} quantity={quantity(item.name)}
-      handleRemove={handleRemoveFromCart}
+    return <MenuItem item={item} inCart={isInCart} cartItemQuantity={quantity(item.name)} cartItemNote={cartItemNote(item.name)}
+      onPress={() => handleAddToCart(item)}
+      handleIncrease={handleIncrease} handleDecrease={handleDecrease} 
+      handleRemove={handleRemoveFromCart} handleNote={handleNote}
     ></MenuItem>
   }
   const sectionHeader = ({ section }) => { return <MenuHeader section={section} /> }
@@ -84,6 +82,18 @@ function MenuList({selectedTable,existingOrder}) {
       }
     }))
   }
+  function handleNote(name,text) {
+    setOrderCart(orderCart.map(item => {
+      if (item.name === name) {
+        return {
+          ...item, note: text
+        }
+      }
+      else {
+        return item
+      }
+    }))
+  }
   function handleDecrease(name) {
     setOrderCart(orderCart.map(item => {
       if (item.name === name) {
@@ -105,10 +115,10 @@ function MenuList({selectedTable,existingOrder}) {
       keyExtractor={(item) => item.name}
       ListHeaderComponent={
         <FilterAndSortHeader
-          handleSearch={handleText}
-          total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder}
-          handleCategory={handleFilterCategory}
-          handleSort={handleSortBy} />}
+          handleSearch={handleText} //SearchBar
+          total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} //Shopping cart
+          handleCategory={handleFilterCategory} //FilterCategory
+          handleSort={handleSortBy} />} //SortMenuItemsButton
     // ListFooterComponent={
     // <Button disabled={orderCart.length===0} title={"View Order"} 
     // onPress={()=>navigation.
@@ -124,7 +134,12 @@ function MenuList({selectedTable,existingOrder}) {
 
 }
 
-function MenuItem({ item, onPress, inCart, quantity, handleIncrease, handleDecrease, handleRemove }) {
+function MenuItem({ item, onPress, inCart, cartItemQuantity,cartItemNote, handleIncrease, handleDecrease, handleRemove,handleNote }) {
+  const [text,setText] = useState((cartItemNote!==undefined &&cartItemNote!==null )?cartItemNote:"")
+  const [visible,setVisible] = useState(false)
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
+
   return (<View style={styles.menuItem}>
     <View>
       <Text>{item.name}</Text>
@@ -132,12 +147,13 @@ function MenuItem({ item, onPress, inCart, quantity, handleIncrease, handleDecre
       <Text>Price: {AustralianCurrency(item.price)}</Text>
       {inCart(item.name)
         ? <View>
-          <Text>Quantity: {quantity}</Text>
+          <Text>Quantity: {cartItemQuantity}</Text>
+          {cartItemNote!==undefined &&cartItemNote!==null &&<Text>Notes: {cartItemNote}</Text>} 
           <Button title="Increase" onPress={() => { handleIncrease(item.name) }}></Button>
-          <Button disabled={quantity === 1} title="Decrease" onPress={() => { handleDecrease(item.name) }}></Button>
+          <Button disabled={cartItemQuantity === 1} title="Decrease" onPress={() => { handleDecrease(item.name) }}></Button>
           <Button disabled={!inCart(item.name)} title="Remove" onPress={() =>
             // {handleRemove(item._id)}
-            Alert.alert(`Are you sure you want to remove \n${item.name} x${quantity}?`, '', [
+            Alert.alert(`Are you sure you want to remove \n${item.name} x${cartItemQuantity}?`, '', [
               {
                 text: "Yes",
                 onPress: () => handleRemove(item.name)
@@ -148,16 +164,27 @@ function MenuItem({ item, onPress, inCart, quantity, handleIncrease, handleDecre
               }
             ])
           } />
+          {/* This is menu items.. not note */}
+          <Button title={(cartItemNote!==undefined&&cartItemNote!==null)?"Edit note":"Add note"} onPress={showModal}></Button>
+          
+          <Portal>
+            <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
+              <TextInput label='Notes' value={text} onChangeText={setText}></TextInput>
+              <Button title='Submit' onPress={()=>{
+                handleNote(item.name,text)
+                hideModal()
+              }}></Button>
+              <Button title='Cancel' onPress={()=>{
+                hideModal()
+              }}></Button>
+            </Modal>
+          </Portal>
         </View>
         : <Button title={inCart(item.name) ? "In cart" : "Add To Cart"} onPress={() => {onPress(item) }}>
         </Button>
+        
       }
 
-      {/* <Text>Quantity: {quantity}</Text>
-      <Button title="Increase" onPress={()=>{handleIncrease(item._id)}}></Button>
-      <Button disabled={quantity===1} title="Decrease" onPress={()=>{handleDecrease(item._id)}}></Button>
-      <Button disabled={!inCart(item._id)} title="Remove" onPress={()=>handleRemove(item._id)} />
-      <Button disabled={inCart(item._id)} title={inCart(item._id)?"In cart":"Add To Cart"} onPress={()=>onPress(item)}></Button> */}
     </View>
   </View>);
 }

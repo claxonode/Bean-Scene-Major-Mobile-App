@@ -1,5 +1,5 @@
 import { View,Text,FlatList,StyleSheet,Button } from "react-native";
-import { Portal, Searchbar,Modal } from "react-native-paper";
+import { Portal, Searchbar,Modal,ActivityIndicator } from "react-native-paper";
 import { useEffect,useState, } from "react";
 import { getOrders } from "../services/OrderApiService";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,30 +8,41 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function OrdersScreen() {
     const [orders,setOrders] = useState([])
+    const [isLoading,setIsLoading] = useState(true)
 
-    // console.log(AustralianDate('2023-11-10T12:08:04.926Z'))
     useEffect(() => {
         async function fetchData() {
           try {
             const data = await getOrders();
+            // setIsLoading(false)
             setOrders(data)
+            setIsLoading(false)
           } catch (error) {
-            console.error('Error fetching tables:', error);
-          }
+            // setIsLoading(false).
+            
+            console.error('Error fetching orders:', error);
+            setIsLoading(false)
+          } 
         }
     
         fetchData();
+        
       }, [orders]);
 
       // const [searchQuery, setSearchQuery] = useState('');
 
       // const onChangeSearch = query => setSearchQuery(query);
     return (
+        
         <SafeAreaView>
-            <FlatList data={orders} renderItem={({item})=><Order order={item}/>}
+          {isLoading===true?<ActivityIndicator animating={isLoading}/>
+        :
+        <FlatList data={orders} renderItem={({item})=><Order order={item}/>}
                 keyExtractor={(item,index)=>`orders_${index}_${item.id}`}
             >
             </FlatList>
+      }
+            
             
         </SafeAreaView>
     );
@@ -43,10 +54,7 @@ function Order({order}) {
   const showModal = () => { setVisible(true) }
   const hideModal = () => { setVisible(false) }
   const navigation = useNavigation();
-    // console.log(new Intl.DateTimeFormat('en-US',{timeStyle:'medium',dateStyle:'short'}).format(isoDate));
-    // console.log(item.orderDate)
-    // // console.log(AustralianDate(item.orderDate))
-    // console.log(order)
+
     const orderItems = order.orderItems.map((item,index) => {
       return <View key={`${item.id}_cart_${index}`}>
           <View  style={{ flexDirection: 'row', gap: 40 }}>
@@ -54,6 +62,7 @@ function Order({order}) {
               <Text style={{flex:1}}>x{item.quantity}</Text>
               <Text style={{flex:2,textAlign:'right'}}>{AustralianCurrency(item.price)}</Text>
           </View>
+          {item.note && <Text>&#10148;Notes: {item.note}</Text>}
       </View>
   });
 
@@ -65,7 +74,7 @@ function Order({order}) {
             <Text>Status: {order.orderStatus}</Text>
             <Text>Table: {order.tableNumber}</Text>
             <Text>Created By: {order.createdBy}</Text>
-            {order.notes&&<Text>Notes: {order.notes}</Text>}
+            {order.notes&&<Text>More Notes: {order.notes}</Text>}
             <Button title="Show order" onPress={showModal}></Button>
             <Portal>
               <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalBoxContainer}>
@@ -78,7 +87,7 @@ function Order({order}) {
                 >Table: {order.tableNumber}</Text>
                 </View>
                 {orderItems}
-                {order.notes&&<Text>Notes: {order.notes}</Text>}
+                {order.notes&&<Text>More Notes: {order.notes}</Text>}
                 <Button title="Edit order" onPress={()=>{
                   hideModal()
                   navigation.navigate('UpdateOrder',{order: order, name:`Edit order ${ShortDate(order.orderDate)}`});
