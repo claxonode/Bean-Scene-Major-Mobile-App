@@ -1,9 +1,10 @@
 import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge, TextInput } from 'react-native-paper';
 import { View, SafeAreaView, Pressable, Text, Dimensions, StyleSheet, Button, Alert } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { AustralianCurrency } from '../services/FormatService'
 import { postNewOrder,updateOrder } from '../services/OrderApiService'
+import {getMenuCategories} from '../services/MenuApiService'
 
 
 function FilterSearch({ onChange }) {
@@ -22,13 +23,27 @@ function FilterSearch({ onChange }) {
     );
 }
 
-function FilterCategory({ onChange }) {
+async function FilterCategory({ onChange,categories }) {
     //TO DO: make it dynamic..
     const [currentFilter, setCurrentFilter] = useState("All")
     const buttonList = [
         { value: "All", label: 'All' },
         { value: "Drink", label: 'Drink' },
         { value: "Main", label: 'Main' }]
+    // const buttonList = categories
+    // const [buttonList,setButtonList] = useState([])
+    // useEffect(()=>{
+    //     async function fetchData() {
+    //     const data = await getMenuCategories()
+    //     setButtonList(data)
+    //     }
+    //     fetchData()
+    // },[])
+    // const buttonList = await getMenuCategories()
+    // console.log(data)
+    // console.log(categories)
+    // const b = await getMenuCategories();
+    // console.log(b)
     return (<SafeAreaView>
         <SegmentedButtons
             value={currentFilter}
@@ -38,6 +53,7 @@ function FilterCategory({ onChange }) {
             }}
             buttons={buttonList}
         />
+        
     </SafeAreaView>)
 }
 
@@ -56,7 +72,7 @@ function SortMenuItemsButton({ onChange }) {
         { text: "Price descending", param: "pricedes" },]
 
     const listSortTypes = sortTypes.map(item =>
-        <View key={`Id_${item.param}`}>
+        <View style={{flex:1,alignItems:'center'}} key={`Id_${item.param}`}>
             <Pressable onPress={() => handleSelectOption(item.param)}>
                 <Text>{item.text}</Text>
             </Pressable>
@@ -149,9 +165,10 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
 }
 
 
-export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, total, itemCount, orderCart, selectedTable, existingOrder }) {
+export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, total, itemCount, orderCart, selectedTable, existingOrder,categories }) {
     //To Do needs to be sticky
-    return <View>
+
+    return <View style={styles.filterAndSortHeader}>
         {/* <SelectedTableDetails></SelectedTableDetails> */}
         <View style={{ flexDirection: 'row' }}>
             <FilterSearch onChange={handleSearch} >
@@ -161,13 +178,16 @@ export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, 
             {/* Also button style for each item can change. */}
             <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} ></ShoppingCart>
         </View>
-        <FilterCategory onChange={handleCategory}></FilterCategory>
+        <FilterCategory onChange={handleCategory} categories={categories}></FilterCategory>
 
     </View>
 }
 
 const screenWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
+    filterAndSortHeader: {
+        paddingBottom:10
+    },
     modalHeader: {
         fontSize: 35
     },
@@ -199,9 +219,9 @@ const styles = StyleSheet.create({
     sortOrderByPopup: {
         flexDirection: 'column',
         position: 'absolute',
-        right: 60, width: '250%', top: 5,
+        right: -60, width: '250%', top: 50,
         backgroundColor: 'white', zIndex: 1,
-        borderWidth: 3, borderRadius: 4,
+        borderWidth: 1, borderRadius: 4,
 
     },
     sortOrderByContainer: {

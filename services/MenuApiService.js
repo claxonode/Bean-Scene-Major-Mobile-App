@@ -24,6 +24,28 @@ export async function getAllMenuItems() {
       }
 }
 
+export async function getMenuCategories() {
+  const finalUrl = new URL('api/menuItems/categories',BASE_URL)
+  const token = await getToken();
+  try {
+    const response = await fetch(finalUrl,{
+      method:"GET",
+      headers:{
+        "Authorization":`Bearer ${token}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log('There has been a problem with your fetch operation: ' + error.message);
+    throw error;
+  }
+}
+
+
 export async function getAllMenuItemsByCategory() {
     const finalUrl = new URL('api/menuItems/asSectionData', BASE_URL)
     const token = await getToken();
