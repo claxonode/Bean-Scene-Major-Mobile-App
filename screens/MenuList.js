@@ -215,29 +215,28 @@ function MenuItem({ item, onPress, inCart, cartItemQuantity,cartItemNote, handle
 
   //   </View>
   // </View>);
-
 return (
-  <View style={styles.menuItem}>
+  <View style={(inCart(item.name))?styles.menuItemInCart:styles.menuItem}>
+  {/* // <View style={[styles.menuItemInCart]}> */}
     <View style={{flexDirection:'row'}}>
-      <View style={{flex:2}}>
-    <Text>{item.name}</Text>
-    <Text>{item.description}</Text>
-    <Text>Price: {AustralianCurrency(item.price)}</Text>
-    {inCart(item.name) && cartItemNote!==undefined &&cartItemNote!==null &&<Text>Notes: {cartItemNote}</Text>}
-    </View>
-    
-    {inCart(item.name)
+      {/* <View style={inCart(item.name)?styles.menuItemLeftBoxWidthIcon:styles.menuItemLeftBoxNormal}> */}
+      <View style={styles.menuItemDescription}>
+        <Text>{item.name}</Text>
+        <Text>{item.description}</Text>
+        <Text>Price: {AustralianCurrency(item.price)}</Text>
+        {inCart(item.name) && cartItemNote!==undefined &&cartItemNote!==null &&<Text>Notes: {cartItemNote}</Text>}
+      </View>
+      {inCart(item.name)
     && 
-    <View style={{flex:1,alignItems:'center'}}>
-        <Text>Quantity: {cartItemQuantity}</Text>
-        
-        <View style={{flexDirection:'row'}}>
-        <IconButton disabled={cartItemQuantity === 1} size={30}  icon={"minus-circle"} onPress={() => { handleDecrease(item.name) }}></IconButton>
+    <View style={styles.menuItemIconContainer}>
+        <View style={styles.menuItemIconRow}>
+        <IconButton disabled={cartItemQuantity === 1} size={30} icon={"minus-circle"} onPress={() => { handleDecrease(item.name) }}></IconButton>
+        <Text style={{fontWeight:'bold'}}>{cartItemQuantity}</Text>
         <IconButton icon={"plus-circle"} size={30} onPress={() => { handleIncrease(item.name) }}></IconButton>
         
        
         </View>
-        <View style={{flexDirection:'row'}}>
+        <View style={styles.menuItemIconRow}>
         <IconButton disabled={!inCart(item.name)} size={30} icon="delete" onPress={() => onRemovePress()} />
         <IconButton icon="comment-edit" onPress={showModal} size={30}></IconButton>
         </View>
@@ -267,7 +266,7 @@ function OrderItemNotesModal({item,cartItemQuantity,text,setText,handleSubmit,hi
   return (
     <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
       <Text>{item.name} x{cartItemQuantity} {AustralianCurrency(item.price)}</Text>
-      <TextInput label='Notes' value={text} onChangeText={setText}></TextInput>
+      <TextInput label='Notes' value={text} onChangeText={setText} multiline={true} maxLength={250}></TextInput>
       <Button title='Submit' onPress={()=>handleSubmit(item.name,text)}></Button>
       <Button title='Cancel' onPress={hideModal}></Button>
     </Modal>
@@ -293,6 +292,30 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderColor: 'black',
     elevation: 3
+  },
+  menuItemInCart: {
+    flex: 1,
+    padding: 10,
+    margin: 10,
+    marginTop:4,
+    marginBottom:4,
+    borderStyle: 'solid',
+    backgroundColor: 'limegreen',
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: 'black',
+    elevation: 3
+  },
+  menuItemDescription: {
+    flex:4
+  },
+  menuItemIconContainer: {
+    flex:2,alignItems:'center',
+  },
+  menuItemIconRow: {
+    flexDirection:'row',alignItems:'center',justifyContent:'space-evenly'
+  },
+  menuItemLeftBoxNormal: {
   },
   menuHeader: {
     fontSize: 25

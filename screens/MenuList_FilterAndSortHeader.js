@@ -1,4 +1,4 @@
-import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge, TextInput, Button } from 'react-native-paper';
+import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge, TextInput, Button, Divider } from 'react-native-paper';
 import { View, SafeAreaView, Pressable, Text, Dimensions, StyleSheet, Button as ButtonNormal, Alert, FlatList } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -221,7 +221,7 @@ export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, 
     </View>
 }
 
-const screenWidth = Dimensions.get('window').width;
+
 const styles = StyleSheet.create({
     filterAndSortHeader: {
         paddingBottom: 10
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
         position: 'relative'
     },
     filterTextInputBox: {
-        width: screenWidth / 1.5
+        width: '66.66%'
     }
 });
 
