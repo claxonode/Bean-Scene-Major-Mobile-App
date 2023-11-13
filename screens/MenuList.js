@@ -35,7 +35,6 @@ function MenuList({selectedTable,existingOrder}) {
   const isInCart = (name) => orderCart.some(x => x.name === name)
   const quantity = (name)=>isInCart(name) ?  orderCart.find(x=>x.name===name).quantity:  0
   const cartItemNote = (name)=> isInCart(name) ? orderCart.find(x=>x.name===name).note : ""
-  const categories = Categories(menuItems);
 
 
   const total = orderCart.reduce((acc, item) => {
@@ -113,7 +112,7 @@ function MenuList({selectedTable,existingOrder}) {
     <FilterAndSortHeader style={styles.filterBar}
           handleSearch={handleText} //SearchBar
           total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} //Shopping cart
-          categories={categories}//filter buttons
+          // categories={categories}//filter buttons
           handleCategory={handleFilterCategory} //FilterCategory
           handleSort={handleSortBy} />
     <SectionList sections={menuItems}
@@ -164,6 +163,11 @@ function MenuItem({ item, onPress, inCart, cartItemQuantity,cartItemNote, handle
       onPress: () => { }
     }
   ])
+
+  const handleSubmit = (itemName,text)=>{
+    handleNote(itemName,text)
+    hideModal()
+  }
   // return (<View style={styles.menuItem}>
   //   <View>
   //     <Text>{item.name}</Text>
@@ -238,18 +242,13 @@ return (
         <IconButton icon="comment-edit" onPress={showModal} size={30}></IconButton>
         </View>
         
+
         <Portal>
-          <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
-            <TextInput label='Notes' value={text} onChangeText={setText}></TextInput>
-            <Button title='Submit' onPress={()=>{
-              handleNote(item.name,text)
-              hideModal()
-            }}></Button>
-            <Button title='Cancel' onPress={()=>{
-              hideModal()
-            }}></Button>
-          </Modal>
+          <OrderItemNotesModal item={item} cartItemQuantity={cartItemQuantity} text={text} setText={setText} handleSubmit={handleSubmit}
+          hideModal={hideModal} visible={visible}
+         ></OrderItemNotesModal>
         </Portal>
+        
       </View>
     }
     </View>
@@ -264,6 +263,17 @@ function MenuHeader({ section }) {
   )
 }
 
+function OrderItemNotesModal({item,cartItemQuantity,text,setText,handleSubmit,hideModal,visible}) {
+  return (
+    <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
+      <Text>{item.name} x{cartItemQuantity} {AustralianCurrency(item.price)}</Text>
+      <TextInput label='Notes' value={text} onChangeText={setText}></TextInput>
+      <Button title='Submit' onPress={()=>handleSubmit(item.name,text)}></Button>
+      <Button title='Cancel' onPress={hideModal}></Button>
+    </Modal>
+
+  );
+}
 
 const styles = StyleSheet.create({
   mainContainer: {
