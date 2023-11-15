@@ -4,7 +4,6 @@ const BASE_URL = "http://10.0.2.2:5240";
 export async function postNewOrder(order) {
     const finalUrl = new URL('api/Orders', BASE_URL)
     const token = await getToken();
-    // console.log(orderCart)
     try {
         const response = await fetch(finalUrl,{
             method:'POST',
