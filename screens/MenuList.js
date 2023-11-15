@@ -7,7 +7,7 @@ import { FilterAndSortHeader } from './MenuList_FilterAndSortHeader';
 
 
 import { getAllMenuItemsByCategoryQueryable } from '../services/MenuApiService';
-import { AustralianCurrency } from '../services/FormatService'
+import { AustralianCurrency,Categories } from '../services/FormatService'
 
 
 
@@ -35,6 +35,7 @@ function MenuList({selectedTable,existingOrder}) {
   const isInCart = (name) => orderCart.some(x => x.name === name)
   const quantity = (name)=>isInCart(name) ?  orderCart.find(x=>x.name===name).quantity:  0
   const cartItemNote = (name)=> isInCart(name) ? orderCart.find(x=>x.name===name).note : ""
+
 
   const total = orderCart.reduce((acc, item) => {
     acc += item.quantity * item.price
@@ -108,17 +109,29 @@ function MenuList({selectedTable,existingOrder}) {
     }));
   }
   return <SafeAreaView style={styles.mainContainer}>
+    <FilterAndSortHeader style={styles.filterBar}
+          handleSearch={handleText} //SearchBar
+          total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} //Shopping cart
+          // categories={categories}//filter buttons
+          handleCategory={handleFilterCategory} //FilterCategory
+          handleSort={handleSortBy} />
     <SectionList sections={menuItems}
       renderItem={menuItem}
       renderSectionHeader={sectionHeader}
       extraData={{ quantity, orderCart }}
       keyExtractor={(item) => item.name}
-      ListHeaderComponent={
-        <FilterAndSortHeader
-          handleSearch={handleText} //SearchBar
-          total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} //Shopping cart
-          handleCategory={handleFilterCategory} //FilterCategory
-          handleSort={handleSortBy} />} //SortMenuItemsButton
+      // ListHeaderComponent ={
+      //   <FilterAndSortHeader 
+      //     handleSearch={handleText} //SearchBar
+      //     total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} //Shopping cart
+      //     handleCategory={handleFilterCategory} //FilterCategory
+      //     handleSort={handleSortBy} />} //SortMenuItemsButton
+      // StickyHeaderComponent={<FilterAndSortHeader 
+      //   handleSearch={handleText} //SearchBar
+      //   total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} //Shopping cart
+      //   handleCategory={handleFilterCategory} //FilterCategory
+      //   handleSort={handleSortBy} />}
+      // stickyHeaderIndices={[0]}
     // ListFooterComponent={
     // <Button disabled={orderCart.length===0} title={"View Order"} 
     // onPress={()=>navigation.
@@ -140,53 +153,107 @@ function MenuItem({ item, onPress, inCart, cartItemQuantity,cartItemNote, handle
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
-  return (<View style={styles.menuItem}>
-    <View>
-      <Text>{item.name}</Text>
-      <Text>{item.description}</Text>
-      <Text>Price: {AustralianCurrency(item.price)}</Text>
-      {inCart(item.name)
-        ? <View>
-          <Text>Quantity: {cartItemQuantity}</Text>
-          {cartItemNote!==undefined &&cartItemNote!==null &&<Text>Notes: {cartItemNote}</Text>} 
-          <Button title="Increase" onPress={() => { handleIncrease(item.name) }}></Button>
-          <Button disabled={cartItemQuantity === 1} title="Decrease" onPress={() => { handleDecrease(item.name) }}></Button>
-          <Button disabled={!inCart(item.name)} title="Remove" onPress={() =>
-            // {handleRemove(item._id)}
-            Alert.alert(`Are you sure you want to remove \n${item.name} x${cartItemQuantity}?`, '', [
-              {
-                text: "Yes",
-                onPress: () => handleRemove(item.name)
-              },
-              {
-                text: "No",
-                onPress: () => { }
-              }
-            ])
-          } />
-          {/* This is menu items.. not note */}
-          <Button title={(cartItemNote!==undefined&&cartItemNote!==null)?"Edit note":"Add note"} onPress={showModal}></Button>
-          
-          <Portal>
-            <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
-              <TextInput label='Notes' value={text} onChangeText={setText}></TextInput>
-              <Button title='Submit' onPress={()=>{
-                handleNote(item.name,text)
-                hideModal()
-              }}></Button>
-              <Button title='Cancel' onPress={()=>{
-                hideModal()
-              }}></Button>
-            </Modal>
-          </Portal>
-        </View>
-        : <Button title={inCart(item.name) ? "In cart" : "Add To Cart"} onPress={() => {onPress(item) }}>
-        </Button>
-        
-      }
+  const onRemovePress = () => Alert.alert(`Are you sure you want to remove \n${item.name} x${cartItemQuantity}?`, '', [
+    {
+      text: "Yes",
+      onPress: () => handleRemove(item.name)
+    },
+    {
+      text: "No",
+      onPress: () => { }
+    }
+  ])
 
+  const handleSubmit = (itemName,text)=>{
+    handleNote(itemName,text)
+    hideModal()
+  }
+  // return (<View style={styles.menuItem}>
+  //   <View>
+  //     <Text>{item.name}</Text>
+  //     <Text>{item.description}</Text>
+  //     <Text>Price: {AustralianCurrency(item.price)}</Text>
+  //     {inCart(item.name)
+  //     ? <View>
+  //         <Text>Quantity: {cartItemQuantity}</Text>
+  //         {cartItemNote!==undefined &&cartItemNote!==null &&<Text>Notes: {cartItemNote}</Text>} 
+  //         <Button title="Increase" onPress={() => { handleIncrease(item.name) }}></Button>
+  //         <Button disabled={cartItemQuantity === 1} title="Decrease" onPress={() => { handleDecrease(item.name) }}></Button>
+  //         <Button disabled={!inCart(item.name)} title="Remove" onPress={() =>
+  //           // {handleRemove(item._id)}
+  //           Alert.alert(`Are you sure you want to remove \n${item.name} x${cartItemQuantity}?`, '', [
+  //             {
+  //               text: "Yes",
+  //               onPress: () => handleRemove(item.name)
+  //             },
+  //             {
+  //               text: "No",
+  //               onPress: () => { }
+  //             }
+  //           ])
+  //         } />
+  //         {/* This is menu items.. not note */}
+  //         <Button title={(cartItemNote!==undefined&&cartItemNote!==null)?"Edit note":"Add note"} onPress={showModal}></Button>
+          
+  //         <Portal>
+  //           <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
+  //             <TextInput label='Notes' value={text} onChangeText={setText}></TextInput>
+  //             <Button title='Submit' onPress={()=>{
+  //               handleNote(item.name,text)
+  //               hideModal()
+  //             }}></Button>
+  //             <Button title='Cancel' onPress={()=>{
+  //               hideModal()
+  //             }}></Button>
+  //           </Modal>
+  //         </Portal>
+  //       </View>
+  //       : <Button title={inCart(item.name) ? "In cart" : "Add To Cart"} onPress={() => {onPress(item) }}>
+  //       </Button>
+        
+  //     }
+
+  //   </View>
+  // </View>);
+return (
+  <View style={(inCart(item.name))?styles.menuItemInCart:styles.menuItem}>
+  {/* // <View style={[styles.menuItemInCart]}> */}
+    <View style={{flexDirection:'row'}}>
+      {/* <View style={inCart(item.name)?styles.menuItemLeftBoxWidthIcon:styles.menuItemLeftBoxNormal}> */}
+      <View style={styles.menuItemDescription}>
+        <Text>{item.name}</Text>
+        <Text>{item.description}</Text>
+        <Text>Price: {AustralianCurrency(item.price)}</Text>
+        {inCart(item.name) && cartItemNote!==undefined &&cartItemNote!==null &&<Text>Notes: {cartItemNote}</Text>}
+      </View>
+      {inCart(item.name)
+    && 
+    <View style={styles.menuItemIconContainer}>
+        <View style={styles.menuItemIconRow}>
+        <IconButton disabled={cartItemQuantity === 1} size={30} icon={"minus-circle"} onPress={() => { handleDecrease(item.name) }}></IconButton>
+        <Text style={{fontWeight:'bold'}}>{cartItemQuantity}</Text>
+        <IconButton icon={"plus-circle"} size={30} onPress={() => { handleIncrease(item.name) }}></IconButton>
+        
+       
+        </View>
+        <View style={styles.menuItemIconRow}>
+        <IconButton disabled={!inCart(item.name)} size={30} icon="delete" onPress={() => onRemovePress()} />
+        <IconButton icon="comment-edit" onPress={showModal} size={30}></IconButton>
+        </View>
+        
+
+        <Portal>
+          <OrderItemNotesModal item={item} cartItemQuantity={cartItemQuantity} text={text} setText={setText} handleSubmit={handleSubmit}
+          hideModal={hideModal} visible={visible}
+         ></OrderItemNotesModal>
+        </Portal>
+        
+      </View>
+    }
     </View>
-  </View>);
+    {!inCart(item.name) &&<Button title="Add To Cart" onPress={() => {onPress(item) }}></Button>}
+  </View>
+);
 }
 
 function MenuHeader({ section }) {
@@ -195,20 +262,60 @@ function MenuHeader({ section }) {
   )
 }
 
+function OrderItemNotesModal({item,cartItemQuantity,text,setText,handleSubmit,hideModal,visible}) {
+  return (
+    <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
+      <Text>{item.name} x{cartItemQuantity} {AustralianCurrency(item.price)}</Text>
+      <TextInput label='Notes' value={text} onChangeText={setText} multiline={true} maxLength={250}></TextInput>
+      <Button title='Submit' onPress={()=>handleSubmit(item.name,text)}></Button>
+      <Button title='Cancel' onPress={hideModal}></Button>
+    </Modal>
+
+  );
+}
 
 const styles = StyleSheet.create({
   mainContainer: {
     padding: 5,
-    margin: 10,
+    margin: 2,
+    flex:1
   },
   menuItem: {
     flex: 1,
     padding: 10,
     margin: 10,
+    marginTop:4,
+    marginBottom:4,
     borderStyle: 'solid',
-    backgroundColor: 'pink',
-    borderWidth: 5,
-    // borderColor: 'black',
+    backgroundColor: '#f7c634',
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: 'black',
+    elevation: 3
+  },
+  menuItemInCart: {
+    flex: 1,
+    padding: 10,
+    margin: 10,
+    marginTop:4,
+    marginBottom:4,
+    borderStyle: 'solid',
+    backgroundColor: 'limegreen',
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: 'black',
+    elevation: 3
+  },
+  menuItemDescription: {
+    flex:4
+  },
+  menuItemIconContainer: {
+    flex:2,alignItems:'center',
+  },
+  menuItemIconRow: {
+    flexDirection:'row',alignItems:'center',justifyContent:'space-evenly'
+  },
+  menuItemLeftBoxNormal: {
   },
   menuHeader: {
     fontSize: 25

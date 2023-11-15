@@ -6,7 +6,9 @@ import { Alert } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { name as appName } from './app.json';
 import { AppRegistry } from 'react-native';
-
+import { jwtDecode } from 'jwt-decode';
+import "core-js/stable/atob";
+// import 'core-js/actual';
 ///Screens
 // import MenuList from './screens/MenuList'
 import CreateScreen from './screens/CreateOrderScreen'
@@ -67,6 +69,13 @@ function App({ navigation }) {
           return;
         }
         const result = await login(username,password)
+        
+        const {exp} = jwtDecode(result.token);
+        const expirationTime = (exp * 1000) - 60000
+        if (Date.now() >= expirationTime) {
+          deleteToken();
+          setToken(null)
+        }
         if (result.authenticated){
           setToken(result.token)
         }

@@ -1,9 +1,10 @@
-import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge, TextInput } from 'react-native-paper';
-import { View, SafeAreaView, Pressable, Text, Dimensions, StyleSheet, Button, Alert } from 'react-native';
-import { useState } from 'react';
+import { Searchbar, SegmentedButtons, IconButton, Portal, Modal, Badge, TextInput, Button, Divider } from 'react-native-paper';
+import { View, SafeAreaView, Pressable, Text, Dimensions, StyleSheet, Button as ButtonNormal, Alert, FlatList } from 'react-native';
+import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { AustralianCurrency } from '../services/FormatService'
-import { postNewOrder,updateOrder } from '../services/OrderApiService'
+import { postNewOrder, updateOrder } from '../services/OrderApiService'
+import { getMenuCategories } from '../services/MenuApiService'
 
 
 function FilterSearch({ onChange }) {
@@ -25,21 +26,58 @@ function FilterSearch({ onChange }) {
 function FilterCategory({ onChange }) {
     //TO DO: make it dynamic..
     const [currentFilter, setCurrentFilter] = useState("All")
-    const buttonList = [
-        { value: "All", label: 'All' },
-        { value: "Drink", label: 'Drink' },
-        { value: "Main", label: 'Main' }]
-    return (<SafeAreaView>
-        <SegmentedButtons
-            value={currentFilter}
-            onValueChange={(value) => {
-                setCurrentFilter(value)
-                onChange(value)
-            }}
-            buttons={buttonList}
-        />
-    </SafeAreaView>)
-}
+    const [buttonList, setButtonList] = useState([])
+    // const buttonList = [
+    //     { value: "All", label: 'All' },
+    //     { value: "Drink", label: 'Drink' },
+    //     { value: "Main", label: 'Main' },
+    //     { value: "Burger", label: 'Burger' },
+    //     { value: "Pasta", label: 'Pasta' },
+    //     { value: "Dessert", label: 'Dessert' },
+    //     { value: "Noodle", label: 'Noodle' },
+    //     { value: "Rice", label: 'Rice' },
+    //     { value: "Breakfast", label: 'Breakfast' }]
+    const onValueChange = (value) => {
+        setCurrentFilter(value)
+        onChange(value)
+    }
+
+    useEffect(() => {
+        async function fetchData() {
+            const data = await getMenuCategories();
+            setButtonList(data)
+        } fetchData()
+    }, [])
+
+    const renderItem = ({ item }) => {
+
+        return <View>
+            <Button onPress={() => { onValueChange(item.value) }}>{item.label}</Button>
+        </View>
+    }
+    // return (
+    //     <SafeAreaView style={styles.container}>
+    //       <SegmentedButtons
+    //         value={currentFilter}
+    //         onValueChange={(value)=>{
+    //             setCurrentFilter(value)
+    //             onChange(value)
+    //         }}
+    //         buttons={buttonList}
+    //       />
+    //     </SafeAreaView>
+    //   );
+
+    // const renderItem =()
+    return (
+        <SafeAreaView >
+            <FlatList horizontal data={buttonList} keyExtractor={item => `${item.label}`}
+                renderItem={renderItem}
+            />
+        </SafeAreaView>
+    );
+};
+
 
 
 function SortMenuItemsButton({ onChange }) {
@@ -56,7 +94,7 @@ function SortMenuItemsButton({ onChange }) {
         { text: "Price descending", param: "pricedes" },]
 
     const listSortTypes = sortTypes.map(item =>
-        <View key={`Id_${item.param}`}>
+        <View style={{ flex: 1, alignItems: 'center' }} key={`Id_${item.param}`}>
             <Pressable onPress={() => handleSelectOption(item.param)}>
                 <Text>{item.text}</Text>
             </Pressable>
@@ -77,22 +115,37 @@ function SortMenuItemsButton({ onChange }) {
 }
 
 function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrder }) {
+    // const navigation = useNavigation();
     const navigation = useNavigation();
     const [visible, setVisible] = useState(false);
-    const [notes, setNotes] = useState(existingOrder===null?"":existingOrder.notes)
+    const [notes, setNotes] = useState(existingOrder === null ? "" : existingOrder.notes)
     const showModal = () => { setVisible(true) }
     const hideModal = () => { setVisible(false) }
 
-    const orderItems = orderCart.map((item, index) => {
-        return <View key={`${item.id}_cart_${index}`}>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Text style={styles.shoppingCartOrderItemsName}>{item.name}</Text>
-                <Text style={styles.shoppingCartQuantity}>x{item.quantity}</Text>
-                <Text style={styles.shoppingCartCurrency}>{AustralianCurrency(item.price)}</Text>
-            </View>
-            {item.note && <Text>&#10148;Notes: {item.note}</Text>}
+    
+    return (
+        <View style={styles.shoppingCartView}>
+            <Portal>
+                {/* <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalBoxContainer}>
+                    <Text style={styles.modalHeader}>Total: {AustralianCurrency(total)}</Text>
+                    <Text style={styles.modalSubHeader}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
+                    {orderItems}
+                    <TextInput label="Additional Notes" value={notes} onChangeText={setNotes} multiline={true} maxLength={250}></TextInput>
+                    <ButtonNormal title="Submit" onPress={() => handleSubmission(existingOrder)}></ButtonNormal>
+                </Modal> */}
+                <ConfirmShoppingCartModal visible={visible} 
+                hideModal={hideModal} total={total} notes={notes} setNotes={setNotes} selectedTable={selectedTable}
+                orderCart={orderCart} existingOrder={existingOrder} navigation={navigation}
+                />
+            </Portal>
+            {/* <View style={{flexDirection:'row'}}> */}
+            <IconButton icon="cart" onPress={itemCount && showModal} style={styles.shoppingCartIcon}></IconButton>
+            {itemCount !== 0 && <Badge>{itemCount}</Badge>}
+
         </View>
-    });
+    );
+}
+function ConfirmShoppingCartModal({visible,hideModal,total,notes,setNotes,selectedTable,orderCart,existingOrder,navigation}) {
     const handleSubmission = async (existingOrder) => {
         let jsonData = {
             tableNumber: selectedTable.name,
@@ -114,7 +167,7 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
                 Alert.alert(`${error}` + " could not update order")
             })
         }
-        if (existingOrder===null) {
+        if (existingOrder === null) {
             postNewOrder(jsonData).then((data) => {
                 hideModal()
                 Alert.alert(`Created order at ${jsonData.tableNumber}`, '', [
@@ -128,30 +181,32 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
             })
         }
     }
-
-    return (
-        <View style={styles.shoppingCartView}>
-            <Portal>
-                <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalBoxContainer}>
-                    <Text style={styles.modalHeader}>Total: {AustralianCurrency(total)}</Text>
-                    <Text style={styles.modalSubHeader}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
-                    {orderItems}
-                    <TextInput label="Additional Notes" value={notes} onChangeText={setNotes} multiline={true} maxLength={250}></TextInput>
-                    <Button title="Submit" onPress={() => handleSubmission(existingOrder)}></Button>
-                </Modal>
-            </Portal>
-            {/* <View style={{flexDirection:'row'}}> */}
-            <IconButton icon="cart" onPress={itemCount && showModal} style={styles.shoppingCartIcon}></IconButton>
-            {itemCount !== 0 && <Badge>{itemCount}</Badge>}
-
+    const orderItems = orderCart.map((item, index) => {
+        return <View key={`${item.id}_cart_${index}`}>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+                <Text style={styles.shoppingCartOrderItemsName}>{item.name}</Text>
+                <Text style={styles.shoppingCartQuantity}>x{item.quantity}</Text>
+                <Text style={styles.shoppingCartCurrency}>{AustralianCurrency(item.price)}</Text>
+            </View>
+            {item.note && <Text>&#10148;Notes: {item.note}</Text>}
         </View>
+    });
+    return (
+        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalBoxContainer}>
+            <Text style={styles.modalHeader}>Total: {AustralianCurrency(total)}</Text>
+            <Text style={styles.modalSubHeader}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
+            {orderItems}
+            <TextInput label="Additional Notes" value={notes} onChangeText={setNotes} multiline={true} maxLength={250}></TextInput>
+            <ButtonNormal title="Submit" onPress={() => handleSubmission(existingOrder)}></ButtonNormal>
+        </Modal>
     );
 }
 
 
 export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, total, itemCount, orderCart, selectedTable, existingOrder }) {
     //To Do needs to be sticky
-    return <View>
+
+    return <View style={styles.filterAndSortHeader}>
         {/* <SelectedTableDetails></SelectedTableDetails> */}
         <View style={{ flexDirection: 'row' }}>
             <FilterSearch onChange={handleSearch} >
@@ -160,14 +215,17 @@ export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, 
             {/*Geoff ToDo: Add a shopping cart icon, that uses modal to confirm order.. when you click submit it post to the server*/}
             {/* Also button style for each item can change. */}
             <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} ></ShoppingCart>
+
         </View>
         <FilterCategory onChange={handleCategory}></FilterCategory>
-
     </View>
 }
 
-const screenWidth = Dimensions.get('window').width;
+
 const styles = StyleSheet.create({
+    filterAndSortHeader: {
+        paddingBottom: 10
+    },
     modalHeader: {
         fontSize: 35
     },
@@ -199,9 +257,9 @@ const styles = StyleSheet.create({
     sortOrderByPopup: {
         flexDirection: 'column',
         position: 'absolute',
-        right: 60, width: '250%', top: 5,
+        right: -60, width: '250%', top: 50,
         backgroundColor: 'white', zIndex: 1,
-        borderWidth: 3, borderRadius: 4,
+        borderWidth: 1, borderRadius: 4,
 
     },
     sortOrderByContainer: {
@@ -209,7 +267,7 @@ const styles = StyleSheet.create({
         position: 'relative'
     },
     filterTextInputBox: {
-        width: screenWidth / 1.5
+        width: '66.66%'
     }
 });
 
