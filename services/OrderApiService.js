@@ -44,6 +44,31 @@ export async function updateOrder(order) {
       }
 }
 
+export async function approveOrderItem(order,menuItem){
+  const finalUrl = new URL(`api/Orders/${menuItem}`,BASE_URL)
+  const token = await getToken();
+  const data = {orderId:order.orderId,
+    productItem:menuItem.name,
+  }
+  try {
+    const response = await fetch(finalUrl,{
+      method:"PUT",
+      headers: {
+        "Authorization":`Bearer ${token}`,
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(data)
+    });
+    if (response.ok) {
+      return response;
+    }
+    throw new Error(`${response.status}`)
+  } catch (error) {
+      console.log("There has been a problem with your fetch operation: "+error.message)
+      throw error;
+    }
+}
+
 
 export async function getOrders() {
     const finalUrl = new URL('api/orders/', BASE_URL)

@@ -49,10 +49,14 @@ export default function OrdersScreen() {
 
 }
 
+
 function Order({order}) {
   const [visible, setVisible] = useState(false);
   const showModal = () => { setVisible(true) }
   const hideModal = () => { setVisible(false) }
+  const approveItem = () => {
+
+  }
   const navigation = useNavigation();
 
     const orderItems = order.orderItems.map((item,index) => {
@@ -60,6 +64,9 @@ function Order({order}) {
           <View  style={{ flexDirection: 'row', gap: 40 }}>
               <Text style={{flex:3}}>{item.name}</Text>
               <Text style={{flex:1}}>x{item.quantity}</Text>
+              {/* <Text >{item.status}</Text> */}
+              <Button title={item.status} onPress={()=>{}}></Button> 
+              {/* ToDo Work on approve item and approve order */}
               <Text style={{flex:2,textAlign:'right'}}>{AustralianCurrency(item.price)}</Text>
           </View>
           {item.note && <Text>&#10148;Notes: {item.note}</Text>}
@@ -92,7 +99,10 @@ function Order({order}) {
                   hideModal()
                   navigation.navigate('UpdateOrder',{order: order, name:`Edit order ${ShortDate(order.orderDate)}`});
                 }}></Button>
-                
+                <Button title="Approve order" onPress={()=>{
+                  hideModal()
+                  
+                }}></Button>
               </Modal>
             </Portal>
         </View>

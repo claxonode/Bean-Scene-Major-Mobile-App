@@ -7,8 +7,7 @@ import { PaperProvider } from 'react-native-paper';
 import { name as appName } from './app.json';
 import { AppRegistry } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
-import "core-js/stable/atob";
-// import 'core-js/actual';
+import 'core-js/stable/atob';
 ///Screens
 // import MenuList from './screens/MenuList'
 import CreateScreen from './screens/CreateOrderScreen'
@@ -70,13 +69,14 @@ function App({ navigation }) {
         }
         const result = await login(username,password)
         
-        const {exp} = jwtDecode(result.token);
-        const expirationTime = (exp * 1000) - 60000
-        if (Date.now() >= expirationTime) {
+        
+        if (result.authenticated){
+          const {exp} = jwtDecode(result.token);
+          const expirationTime = (exp * 1000) - 60000
+          if (Date.now() >= expirationTime) {
           deleteToken();
           setToken(null)
-        }
-        if (result.authenticated){
+          }
           setToken(result.token)
         }
         // In a production app, we need to send some data (usually username, password) to server and get a token
@@ -110,6 +110,7 @@ function App({ navigation }) {
               name="Login"
               component={LoginScreen}
               options={{
+                headerShown:false,
                 // When logging out, a pop animation feels intuitive
                 animationTypeForReplace: token ? 'pop' : 'push',
               }}

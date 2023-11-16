@@ -32,11 +32,11 @@ function MenuList({selectedTable,existingOrder}) {
       }
     } fetchData()
   }, [searchText, sortBy, filterCategory])
+
+  //In cart functions
   const isInCart = (name) => orderCart.some(x => x.name === name)
   const quantity = (name)=>isInCart(name) ?  orderCart.find(x=>x.name===name).quantity:  0
   const cartItemNote = (name)=> isInCart(name) ? orderCart.find(x=>x.name===name).note : ""
-
-
   const total = orderCart.reduce((acc, item) => {
     acc += item.quantity * item.price
     return acc
@@ -46,16 +46,7 @@ function MenuList({selectedTable,existingOrder}) {
     return acc
   }, 0)
 
-
-  const menuItem = ({ item }) => {
-    return <MenuItem item={item} inCart={isInCart} cartItemQuantity={quantity(item.name)} cartItemNote={cartItemNote(item.name)}
-      onPress={() => handleAddToCart(item)}
-      handleIncrease={handleIncrease} handleDecrease={handleDecrease} 
-      handleRemove={handleRemoveFromCart} handleNote={handleNote}
-    ></MenuItem>
-  }
-  const sectionHeader = ({ section }) => { return <MenuHeader section={section} /> }
-
+  //State handlers
   function handleText(text) {
     setSearchText(text)
   }
@@ -108,9 +99,18 @@ function MenuList({selectedTable,existingOrder}) {
       }
     }));
   }
+  const menuItem = ({ item }) => {
+    return <MenuItem item={item} inCart={isInCart} cartItemQuantity={quantity(item.name)} cartItemNote={cartItemNote(item.name)}
+      onPress={() => handleAddToCart(item)}
+      handleIncrease={handleIncrease} handleDecrease={handleDecrease} 
+      handleRemove={handleRemoveFromCart} handleNote={handleNote}
+    ></MenuItem>
+  }
+  const sectionHeader = ({ section }) => { return <MenuHeader section={section} /> }
+
   return <SafeAreaView style={styles.mainContainer}>
     <FilterAndSortHeader style={styles.filterBar}
-          handleSearch={handleText} //SearchBar
+          handleSearch={handleText} query={searchText}//SearchBar
           total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} //Shopping cart
           // categories={categories}//filter buttons
           handleCategory={handleFilterCategory} //FilterCategory
@@ -234,7 +234,6 @@ return (
         <Text style={{fontWeight:'bold'}}>{cartItemQuantity}</Text>
         <IconButton icon={"plus-circle"} size={30} onPress={() => { handleIncrease(item.name) }}></IconButton>
         
-       
         </View>
         <View style={styles.menuItemIconRow}>
         <IconButton disabled={!inCart(item.name)} size={30} icon="delete" onPress={() => onRemovePress()} />
@@ -266,7 +265,9 @@ function OrderItemNotesModal({item,cartItemQuantity,text,setText,handleSubmit,hi
   return (
     <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
       <Text>{item.name} x{cartItemQuantity} {AustralianCurrency(item.price)}</Text>
-      <TextInput label='Notes' value={text} onChangeText={setText} multiline={true} maxLength={250}></TextInput>
+      <TextInput label='Notes' value={text} onChangeText={setText} multiline={true} maxLength={250}
+      right={text&&<TextInput.Icon icon="close" onPress={()=>setText("")}></TextInput.Icon>}
+      ></TextInput>
       <Button title='Submit' onPress={()=>handleSubmit(item.name,text)}></Button>
       <Button title='Cancel' onPress={hideModal}></Button>
     </Modal>

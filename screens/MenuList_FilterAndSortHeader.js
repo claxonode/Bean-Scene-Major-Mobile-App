@@ -7,13 +7,11 @@ import { postNewOrder, updateOrder } from '../services/OrderApiService'
 import { getMenuCategories } from '../services/MenuApiService'
 
 
-function FilterSearch({ onChange }) {
-    const [query, setQuery] = useState('')
+function FilterSearch({ onChange,query }) {
     return (
         <Searchbar
             placeholder="Search menu"
             onChangeText={(text) => {
-                setQuery(text)
                 onChange(text)
             }}
             value={query}
@@ -24,8 +22,6 @@ function FilterSearch({ onChange }) {
 }
 
 function FilterCategory({ onChange }) {
-    //TO DO: make it dynamic..
-    const [currentFilter, setCurrentFilter] = useState("All")
     const [buttonList, setButtonList] = useState([])
     // const buttonList = [
     //     { value: "All", label: 'All' },
@@ -38,7 +34,6 @@ function FilterCategory({ onChange }) {
     //     { value: "Rice", label: 'Rice' },
     //     { value: "Breakfast", label: 'Breakfast' }]
     const onValueChange = (value) => {
-        setCurrentFilter(value)
         onChange(value)
     }
 
@@ -50,25 +45,10 @@ function FilterCategory({ onChange }) {
     }, [])
 
     const renderItem = ({ item }) => {
-
         return <View>
             <Button onPress={() => { onValueChange(item.value) }}>{item.label}</Button>
         </View>
     }
-    // return (
-    //     <SafeAreaView style={styles.container}>
-    //       <SegmentedButtons
-    //         value={currentFilter}
-    //         onValueChange={(value)=>{
-    //             setCurrentFilter(value)
-    //             onChange(value)
-    //         }}
-    //         buttons={buttonList}
-    //       />
-    //     </SafeAreaView>
-    //   );
-
-    // const renderItem =()
     return (
         <SafeAreaView >
             <FlatList horizontal data={buttonList} keyExtractor={item => `${item.label}`}
@@ -126,13 +106,6 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
     return (
         <View style={styles.shoppingCartView}>
             <Portal>
-                {/* <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalBoxContainer}>
-                    <Text style={styles.modalHeader}>Total: {AustralianCurrency(total)}</Text>
-                    <Text style={styles.modalSubHeader}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
-                    {orderItems}
-                    <TextInput label="Additional Notes" value={notes} onChangeText={setNotes} multiline={true} maxLength={250}></TextInput>
-                    <ButtonNormal title="Submit" onPress={() => handleSubmission(existingOrder)}></ButtonNormal>
-                </Modal> */}
                 <ConfirmShoppingCartModal visible={visible} 
                 hideModal={hideModal} total={total} notes={notes} setNotes={setNotes} selectedTable={selectedTable}
                 orderCart={orderCart} existingOrder={existingOrder} navigation={navigation}
@@ -196,26 +169,23 @@ function ConfirmShoppingCartModal({visible,hideModal,total,notes,setNotes,select
             <Text style={styles.modalHeader}>Total: {AustralianCurrency(total)}</Text>
             <Text style={styles.modalSubHeader}>Table: {selectedTable.name} at Area: {selectedTable.area}</Text>
             {orderItems}
-            <TextInput label="Additional Notes" value={notes} onChangeText={setNotes} multiline={true} maxLength={250}></TextInput>
+            <TextInput label="Additional Notes" value={notes} onChangeText={setNotes} multiline={true} maxLength={250}
+            right={notes&&<TextInput.Icon icon="close" onPress={()=>setNotes("")}></TextInput.Icon>}
+            ></TextInput>
             <ButtonNormal title="Submit" onPress={() => handleSubmission(existingOrder)}></ButtonNormal>
         </Modal>
     );
 }
 
 
-export function FilterAndSortHeader({ handleSearch, handleCategory, handleSort, total, itemCount, orderCart, selectedTable, existingOrder }) {
-    //To Do needs to be sticky
+export function FilterAndSortHeader({ query,handleSearch, handleCategory, handleSort, total, itemCount, orderCart, selectedTable, existingOrder }) {
 
     return <View style={styles.filterAndSortHeader}>
-        {/* <SelectedTableDetails></SelectedTableDetails> */}
         <View style={{ flexDirection: 'row' }}>
-            <FilterSearch onChange={handleSearch} >
+            <FilterSearch onChange={handleSearch} query={query} >
             </FilterSearch>
             <SortMenuItemsButton onChange={handleSort}></SortMenuItemsButton>
-            {/*Geoff ToDo: Add a shopping cart icon, that uses modal to confirm order.. when you click submit it post to the server*/}
-            {/* Also button style for each item can change. */}
             <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} ></ShoppingCart>
-
         </View>
         <FilterCategory onChange={handleCategory}></FilterCategory>
     </View>
