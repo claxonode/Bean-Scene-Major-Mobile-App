@@ -194,7 +194,6 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
       {item.note && <Text>&#10148;Notes: {item.note}</Text>}
     </View>
   });
-
   return (
     <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalBoxContainer}>
       <View style={{ flexDirection: 'row', gap: 50 }}>
@@ -207,7 +206,9 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
       </View>
       {orderItems}
       {order.notes && <Text>More Notes: {order.notes}</Text>}
-      <Button title="Edit order" onPress={() => {
+      { order.orderStatus === "PENDING" ? 
+      <>
+        <Button title="Edit order" onPress={() => {
         hideModal()
         navigation.navigate('UpdateOrder', { order: order, name: `Edit order ${ShortDate(order.orderDate)}` });
       }}></Button>
@@ -216,6 +217,12 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
         completeOrder(order.orderId)
         handleCompletedOrder(true)
       }}></Button>
+      </>
+      
+      :
+      <></>
+      }
+      
     </Modal>
   );
 }
