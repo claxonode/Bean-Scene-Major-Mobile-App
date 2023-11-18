@@ -1,5 +1,5 @@
-import { View, Text, FlatList, StyleSheet, Button } from "react-native";
-import { Portal, Searchbar, Modal, ActivityIndicator,Button as ButtonPaper } from "react-native-paper";
+import { View, Text, FlatList,Alert, StyleSheet, Button } from "react-native";
+import { Portal, Searchbar, Modal, ActivityIndicator,Button as ButtonPaper, useTheme } from "react-native-paper";
 import { useCallback, useEffect, useState, } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { getOrders,getOrdersPast24Hours,getOrdersByTable,getTablesWithPendingOrders,completeOrder } from "../services/OrderApiService";
@@ -151,6 +151,7 @@ function SelectOrderStatus({handlePress}) {
 
 
 function OrderItem({ order,handleCompletedOrder }) {
+  const theme = useTheme()
   const [visible, setVisible] = useState(false);
   const showModal = () => { setVisible(true) }
   const hideModal = () => { setVisible(false) }
@@ -160,7 +161,7 @@ function OrderItem({ order,handleCompletedOrder }) {
   const navigation = useNavigation();
 
   return (
-    <View style={styles.orderItem}>
+    <View style={[styles.orderItem,{backgroundColor:theme.colors.primaryContainer}]}>
       <Text>OrderId: {order.orderId}</Text>
       <Text>Date created: {AustralianDate(order.orderDate)}</Text>
       <Text>Status: {order.orderStatus}</Text>
@@ -212,13 +213,13 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
         hideModal()
         navigation.navigate('UpdateOrder', { order: order, name: `Edit order ${ShortDate(order.orderDate)}` });
       }}></Button>
-      <Button title="Approve order" onPress={() => {
+      <Button title="Complete order" onPress={() => {
         hideModal()
+        Alert.alert("Completed order")
         completeOrder(order.orderId)
         handleCompletedOrder(true)
       }}></Button>
       </>
-      
       :
       <></>
       }
@@ -237,10 +238,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     margin: 10,
+    marginTop:4,
+    marginBottom:4,
     borderStyle: 'solid',
-    backgroundColor: 'pink',
-    borderWidth: 5,
-    // borderColor: 'black',
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: 'black',
+    elevation: 3
   },
   menuHeader: {
     fontSize: 25

@@ -1,8 +1,8 @@
 import {useFocusEffect,useRoute, useNavigation} from '@react-navigation/native';
 import React, { useEffect, useState} from 'react';
-import { View, Text, Button, SectionList, FlatList, SafeAreaView, StyleSheet, Pressable } from 'react-native';
+import { View, Button, SectionList, FlatList, SafeAreaView, StyleSheet, Pressable } from 'react-native';
 import {getAllTables} from "../services/TableApiService"
-import { SegmentedButtons } from 'react-native-paper';
+import { SegmentedButtons,Text } from 'react-native-paper';
 
 
 
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   sectionHeader: {
-    backgroundColor: '#f0f0f0',
+    // backgroundColor: '#f0f0f0',
     padding: 8,
     fontWeight: 'bold',
   },

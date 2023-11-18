@@ -113,7 +113,7 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
             </Portal>
             {/* <View style={{flexDirection:'row'}}> */}
             <IconButton icon="cart" onPress={itemCount && showModal} style={styles.shoppingCartIcon}></IconButton>
-            {itemCount !== 0 && <Badge>{itemCount}</Badge>}
+            {itemCount !== 0 && <Badge><Text style={{fontWeight:'bold'}}>{itemCount}</Text></Badge>}
 
         </View>
     );

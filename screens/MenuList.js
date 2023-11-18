@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { SafeAreaView, Pressable, StyleSheet, View, Text, Dimensions, FlatList, Button, SectionList, Keyboard, ScrollView, Alert } from 'react-native';
+import { SafeAreaView, Pressable, StyleSheet, View, Dimensions, FlatList,Text as TextNormal, Button, SectionList, Keyboard, ScrollView, Alert } from 'react-native';
 import { MENULIST, transformMenuForSectionList } from '../data/data';
 import { useRoute } from '@react-navigation/native';
-import { Searchbar, SegmentedButtons, List, IconButton, Portal, Modal, Badge, DataTable,TextInput} from 'react-native-paper';
+import { Searchbar, SegmentedButtons, List, IconButton, Portal, Modal,useTheme, Badge, DataTable,Text,TextInput} from 'react-native-paper';
 import { FilterAndSortHeader } from './MenuList_FilterAndSortHeader';
 
 
@@ -148,6 +148,7 @@ function MenuList({selectedTable,existingOrder}) {
 }
 
 function MenuItem({ item, onPress, inCart, cartItemQuantity,cartItemNote, handleIncrease, handleDecrease, handleRemove,handleNote }) {
+  const theme = useTheme()
   const [text,setText] = useState((cartItemNote!==undefined &&cartItemNote!==null )?cartItemNote:"")
   const [visible,setVisible] = useState(false)
   const showModal = () => setVisible(true);
@@ -168,55 +169,9 @@ function MenuItem({ item, onPress, inCart, cartItemQuantity,cartItemNote, handle
     handleNote(itemName,text)
     hideModal()
   }
-  // return (<View style={styles.menuItem}>
-  //   <View>
-  //     <Text>{item.name}</Text>
-  //     <Text>{item.description}</Text>
-  //     <Text>Price: {AustralianCurrency(item.price)}</Text>
-  //     {inCart(item.name)
-  //     ? <View>
-  //         <Text>Quantity: {cartItemQuantity}</Text>
-  //         {cartItemNote!==undefined &&cartItemNote!==null &&<Text>Notes: {cartItemNote}</Text>} 
-  //         <Button title="Increase" onPress={() => { handleIncrease(item.name) }}></Button>
-  //         <Button disabled={cartItemQuantity === 1} title="Decrease" onPress={() => { handleDecrease(item.name) }}></Button>
-  //         <Button disabled={!inCart(item.name)} title="Remove" onPress={() =>
-  //           // {handleRemove(item._id)}
-  //           Alert.alert(`Are you sure you want to remove \n${item.name} x${cartItemQuantity}?`, '', [
-  //             {
-  //               text: "Yes",
-  //               onPress: () => handleRemove(item.name)
-  //             },
-  //             {
-  //               text: "No",
-  //               onPress: () => { }
-  //             }
-  //           ])
-  //         } />
-  //         {/* This is menu items.. not note */}
-  //         <Button title={(cartItemNote!==undefined&&cartItemNote!==null)?"Edit note":"Add note"} onPress={showModal}></Button>
-          
-  //         <Portal>
-  //           <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
-  //             <TextInput label='Notes' value={text} onChangeText={setText}></TextInput>
-  //             <Button title='Submit' onPress={()=>{
-  //               handleNote(item.name,text)
-  //               hideModal()
-  //             }}></Button>
-  //             <Button title='Cancel' onPress={()=>{
-  //               hideModal()
-  //             }}></Button>
-  //           </Modal>
-  //         </Portal>
-  //       </View>
-  //       : <Button title={inCart(item.name) ? "In cart" : "Add To Cart"} onPress={() => {onPress(item) }}>
-  //       </Button>
-        
-  //     }
 
-  //   </View>
-  // </View>);
 return (
-  <View style={(inCart(item.name))?styles.menuItemInCart:styles.menuItem}>
+  <View style={(inCart(item.name))?[styles.menuItem,{backgroundColor:theme.colors.secondaryContainer}]:[styles.menuItem,{backgroundColor:theme.colors.primaryContainer}]}>
   {/* // <View style={[styles.menuItemInCart]}> */}
     <View style={{flexDirection:'row'}}>
       {/* <View style={inCart(item.name)?styles.menuItemLeftBoxWidthIcon:styles.menuItemLeftBoxNormal}> */}
@@ -264,7 +219,7 @@ function MenuHeader({ section }) {
 function OrderItemNotesModal({item,cartItemQuantity,text,setText,handleSubmit,hideModal,visible}) {
   return (
     <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>
-      <Text>{item.name} x{cartItemQuantity} {AustralianCurrency(item.price)}</Text>
+      <TextNormal>{item.name} x{cartItemQuantity} {AustralianCurrency(item.price)}</TextNormal>
       <TextInput label='Notes' value={text} onChangeText={setText} multiline={true} maxLength={250}
       right={text&&<TextInput.Icon icon="close" onPress={()=>setText("")}></TextInput.Icon>}
       ></TextInput>
@@ -288,20 +243,6 @@ const styles = StyleSheet.create({
     marginTop:4,
     marginBottom:4,
     borderStyle: 'solid',
-    backgroundColor: '#f7c634',
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: 'black',
-    elevation: 3
-  },
-  menuItemInCart: {
-    flex: 1,
-    padding: 10,
-    margin: 10,
-    marginTop:4,
-    marginBottom:4,
-    borderStyle: 'solid',
-    backgroundColor: 'limegreen',
     borderWidth: 1,
     borderRadius: 4,
     borderColor: 'black',
