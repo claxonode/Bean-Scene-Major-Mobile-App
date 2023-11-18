@@ -1,4 +1,4 @@
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useFocusEffect,useRoute, useNavigation} from '@react-navigation/native';
 import React, { useEffect, useState} from 'react';
 import { View, Text, Button, SectionList, FlatList, SafeAreaView, StyleSheet, Pressable } from 'react-native';
 import {getAllTables} from "../services/TableApiService"
@@ -8,6 +8,8 @@ import { SegmentedButtons } from 'react-native-paper';
 
 export default function TableSelection() {
   const navigation = useNavigation();
+
+
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
   const [currentArea,setCurrentArea] = useState("Main")
@@ -16,7 +18,9 @@ export default function TableSelection() {
     // Handle the selected table
     console.log('Selected table:', selectedTable);
     // Add your logic for handling the selected table
-    navigation.navigate('Create', {name:`Create Order at Table ${selectedTable.name}`, selectedTable });
+
+      navigation.navigate('Create', {name:`Create Order at Table ${selectedTable.name}`, selectedTable });
+
   };
 
   useEffect(() => {

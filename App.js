@@ -2,10 +2,9 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert,AppRegistry } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { name as appName } from './app.json';
-import { AppRegistry } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob';
 ///Screens
@@ -21,6 +20,10 @@ import EditOrderScreen from './screens/EditOrderScreen'
 import { AuthContext } from './services/AuthContext';
 import {login,signOut}from './services/LoginApiService'
 import {getToken,deleteToken} from './services/TokenStorage'
+
+
+
+
 
 const Stack = createNativeStackNavigator();
 export default function Main() {
@@ -121,6 +124,7 @@ function App({ navigation }) {
               {/* <Stack.Screen name="Debug" component={DebugLoginScreen}/> */}
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Tables" component={TableSelection}/>
+
               <Stack.Screen name="Create" component={CreateScreen} options={({route})=>({title:route.params.name})} />
               {/* <Stack.Screen name='MenuList' component={MenuList} options={({route})=>({title:route.params.name})} /> */}
               {/* <Stack.Screen name='New Order' component={OrderList}/> */}

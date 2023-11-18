@@ -26,7 +26,7 @@ export default function LoginScreen({ navigation }) {
                 secureTextEntry={securityText} />
                 <Button title='Login' onPress={(e) => attemptLogin()} color={'#b27b43'}/>
             </View>
-            
+            <Text>Powered by Foie Gras</Text>
             
         </SafeAreaView>
     );

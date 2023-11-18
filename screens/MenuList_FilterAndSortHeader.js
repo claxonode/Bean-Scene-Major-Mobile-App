@@ -7,10 +7,10 @@ import { postNewOrder, updateOrder } from '../services/OrderApiService'
 import { getMenuCategories } from '../services/MenuApiService'
 
 
-function FilterSearch({ onChange,query }) {
+export function FilterSearch({ onChange,query,placeholder }) {
     return (
         <Searchbar
-            placeholder="Search menu"
+            placeholder={placeholder}
             onChangeText={(text) => {
                 onChange(text)
             }}
@@ -182,7 +182,7 @@ export function FilterAndSortHeader({ query,handleSearch, handleCategory, handle
 
     return <View style={styles.filterAndSortHeader}>
         <View style={{ flexDirection: 'row' }}>
-            <FilterSearch onChange={handleSearch} query={query} >
+            <FilterSearch onChange={handleSearch} query={query} placeholder={"Search menu"}>
             </FilterSearch>
             <SortMenuItemsButton onChange={handleSort}></SortMenuItemsButton>
             <ShoppingCart total={total} itemCount={itemCount} orderCart={orderCart} selectedTable={selectedTable} existingOrder={existingOrder} ></ShoppingCart>
