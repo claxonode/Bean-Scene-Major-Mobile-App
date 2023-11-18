@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { Alert,AppRegistry } from 'react-native';
-import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
+import { PaperProvider,useTheme } from 'react-native-paper';
 import { name as appName } from './app.json';
 import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob';
@@ -24,29 +24,45 @@ import {getToken,deleteToken} from './services/TokenStorage'
 // import { MD3LightTheme,MD3DarkTheme } from 'react-native-paper';
 import lightTheme from './theme/lightTheme.json';
 import darkTheme from './theme/darkTheme.json'
-import { PreferenceContext } from './services/PreferenceContext';
+import { PreferencesContext } from './services/PreferencesContext';
+import { useCallback,useMemo } from 'react';
 
-const light = {
-  colors: lightTheme.colors,
-}
-const dark= {
-  colors: darkTheme.colors,
-}
+
+
 
 
 const Stack = createNativeStackNavigator();
+
+
 export default function Main() {
+  const [isThemeDark,setIsThemeDark] = useState(false)
+  let theme = isThemeDark?lightTheme:darkTheme;
+  const toggleTheme = useCallback(()=>{
+    return setIsThemeDark(!isThemeDark)
+  },[isThemeDark])
+  
+  const preferences = useMemo(
+    ()=>({
+      toggleTheme,
+      isThemeDark,
+    }),[toggleTheme,isThemeDark]
+  )
   return (
-    <PaperProvider theme={light}>
-      <App/>
-    </PaperProvider>
+    <PreferencesContext.Provider value={preferences}>
+      <PaperProvider theme={theme}>
+          <App/>
+      </PaperProvider>
+    </PreferencesContext.Provider>
+
   );
 }
 
 AppRegistry.registerComponent(appName, () => Main);
 
+
 function App({ navigation }) {
   const [token,setToken] = React.useState(null)
+  const theme = useTheme()
 
   React.useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
@@ -114,8 +130,8 @@ function App({ navigation }) {
 
   return (
     <AuthContext.Provider value={authContext}>
-      <NavigationContainer theme={light}>
-        <Stack.Navigator screenOptions={{headerStyle:{backgroundColor:light.colors.primaryContainer}}}>
+      <NavigationContainer theme={theme}>
+        <Stack.Navigator screenOptions={{headerStyle:{backgroundColor:lightTheme.colors.primaryContainer}}}>
           {token == null ? (
             // No token found, user isn't signed in
             <Stack.Screen
