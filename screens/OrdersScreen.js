@@ -192,7 +192,7 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
         {/* ToDo Work on approve item and approve order */}
         <TextNormal style={{ flex: 2, textAlign: 'right' }}>{AustralianCurrency(item.price)}</TextNormal>
       </View>
-      {item.note && <Text>&#10148;Notes: {item.note}</Text>}
+      {item.note && <TextNormal>&#10148;Notes: {item.note}</TextNormal>}
     </View>
   });
   return (
@@ -206,7 +206,7 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
         >Table: {order.tableNumber}</TextNormal>
       </View>
       {orderItems}
-      {order.notes && <Text>More Notes: {order.notes}</Text>}
+      {order.notes && <TextNormal>More Notes: {order.notes}</TextNormal>}
       { order.orderStatus === "PENDING" ? 
       <>
         <Button title="Edit order" onPress={() => {
