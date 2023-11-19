@@ -1,9 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import React, { useState,useContext, useCallback,useMemo  } from 'react';
 import { Alert,AppRegistry } from 'react-native';
-import { PaperProvider,useTheme } from 'react-native-paper';
+import { PaperProvider,Switch,useTheme } from 'react-native-paper';
 import { name as appName } from './app.json';
 import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob';
@@ -16,16 +16,16 @@ import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import OrdersScreen from './screens/OrdersScreen'
 import EditOrderScreen from './screens/EditOrderScreen'
-
+//Component
+import DarkModeSwitch from './components/DarkModeSwitch';
 //Services
 import { AuthContext } from './services/AuthContext';
 import {login,signOut}from './services/LoginApiService'
 import {getToken,deleteToken} from './services/TokenStorage'
-// import { MD3LightTheme,MD3DarkTheme } from 'react-native-paper';
+//Themes
 import lightTheme from './theme/lightTheme.json';
 import darkTheme from './theme/darkTheme.json'
 import { PreferencesContext } from './services/PreferencesContext';
-import { useCallback,useMemo } from 'react';
 
 
 
@@ -40,7 +40,7 @@ export default function Main() {
   const toggleTheme = useCallback(()=>{
     return setIsThemeDark(!isThemeDark)
   },[isThemeDark])
-  
+
   const preferences = useMemo(
     ()=>({
       toggleTheme,
@@ -63,6 +63,7 @@ AppRegistry.registerComponent(appName, () => Main);
 function App({ navigation }) {
   const [token,setToken] = React.useState(null)
   const theme = useTheme()
+
 
   React.useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
@@ -96,17 +97,24 @@ function App({ navigation }) {
           return;
         }
         const result = await login(username,password)
-        
-        
-        if (result.authenticated){
-          const {exp} = jwtDecode(result.token);
-          const expirationTime = (exp * 1000) - 60000
-          if (Date.now() >= expirationTime) {
-          deleteToken();
-          setToken(null)
+        try {
+          if (result.authenticated){
+            const {exp} = jwtDecode(result.token);
+            const expirationTime = (exp * 1000) - 60000
+            if (Date.now() >= expirationTime) {
+            deleteToken();
+            setToken(null)
+            }
+            setToken(result.token)
           }
-          setToken(result.token)
+          else {
+            Alert.alert("Could not be authenticated");
+          }
         }
+        catch (error) { //Assume failed to connect to anything
+          Alert.alert("Error occurred");
+        }
+        
         // In a production app, we need to send some data (usually username, password) to server and get a token
         // We will also need to handle errors if sign in failed
         // After getting token, we need to persist the token using `SecureStore` or any other encrypted storage
@@ -131,7 +139,14 @@ function App({ navigation }) {
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer theme={theme}>
-        <Stack.Navigator screenOptions={{headerStyle:{backgroundColor:lightTheme.colors.primaryContainer}}}>
+        <Stack.Navigator  screenOptions={{
+          // headerTitle:(props)=><Header></Header>,
+          headerStyle:{backgroundColor:lightTheme.colors.primary},
+          headerTintColor:lightTheme.colors.primaryContainer,
+          statusBarColor:lightTheme.colors.primary,
+          headerRight: ()=> (<DarkModeSwitch></DarkModeSwitch>)
+          }}>
+        {/* <Stack.Navigator  > */}
           {token == null ? (
             // No token found, user isn't signed in
             <Stack.Screen

@@ -1,5 +1,5 @@
-import { View, Text, FlatList,Alert, StyleSheet, Button } from "react-native";
-import { Portal, Searchbar, Modal, ActivityIndicator,Button as ButtonPaper, useTheme } from "react-native-paper";
+import { View,Text as TextNormal, FlatList,Alert, StyleSheet, Button } from "react-native";
+import { Portal,Text, Searchbar, Modal, ActivityIndicator,Button as ButtonPaper, useTheme } from "react-native-paper";
 import { useCallback, useEffect, useState, } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { getOrders,getOrdersPast24Hours,getOrdersByTable,getTablesWithPendingOrders,completeOrder } from "../services/OrderApiService";
@@ -185,12 +185,12 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
   const orderItems = order.orderItems.map((item, index) => {
     return <View key={`${item.id}_cart_${index}`}>
       <View style={{ flexDirection: 'row', gap: 40 }}>
-        <Text style={{ flex: 3 }}>{item.name}</Text>
-        <Text style={{ flex: 1 }}>x{item.quantity}</Text>
+        <TextNormal style={{ flex: 3 }}>{item.name}</TextNormal>
+        <TextNormal style={{ flex: 1 }}>x{item.quantity}</TextNormal>
         {/* <Text >{item.status}</Text> */}
         {/* <Button title={item.status} onPress={() => { }}></Button> */}
         {/* ToDo Work on approve item and approve order */}
-        <Text style={{ flex: 2, textAlign: 'right' }}>{AustralianCurrency(item.price)}</Text>
+        <TextNormal style={{ flex: 2, textAlign: 'right' }}>{AustralianCurrency(item.price)}</TextNormal>
       </View>
       {item.note && <Text>&#10148;Notes: {item.note}</Text>}
     </View>
@@ -198,12 +198,12 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
   return (
     <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalBoxContainer}>
       <View style={{ flexDirection: 'row', gap: 50 }}>
-        <Text
+        <TextNormal
         // style={{styles.modalHeader}}
-        >Total: {AustralianCurrency(order.totalPrice)}</Text>
-        <Text
+        >Total: {AustralianCurrency(order.totalPrice)}</TextNormal>
+        <TextNormal
         // style={styles.modalSubHeader}
-        >Table: {order.tableNumber}</Text>
+        >Table: {order.tableNumber}</TextNormal>
       </View>
       {orderItems}
       {order.notes && <Text>More Notes: {order.notes}</Text>}
@@ -211,7 +211,7 @@ function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder
       <>
         <Button title="Edit order" onPress={() => {
         hideModal()
-        navigation.navigate('UpdateOrder', { order: order, name: `Edit order ${ShortDate(order.orderDate)}` });
+        navigation.navigate('UpdateOrder', { order: order, name: `Order ${ShortDate(order.orderDate)}` });
       }}></Button>
       <Button title="Complete order" onPress={() => {
         hideModal()

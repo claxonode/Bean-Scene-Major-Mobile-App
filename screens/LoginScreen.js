@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PreferencesContext } from '../services/PreferencesContext';
 import { useContext } from 'react';
 
+
 export default function LoginScreen({ navigation }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState(null);
@@ -13,7 +14,6 @@ export default function LoginScreen({ navigation }) {
     const { signIn } = React.useContext(AuthContext);
     
 
-    const {toggleTheme,isThemeDark} = useContext(PreferencesContext)
 
     async function attemptLogin() {
         signIn({ username, password });
@@ -31,11 +31,6 @@ export default function LoginScreen({ navigation }) {
                 <Button title='Login' onPress={(e) => attemptLogin()} color={'#b27b43'}/>
             </View>
             <Text>Powered by Foie Gras</Text>
-            <Switch
-          color={'red'}
-          value={isThemeDark}
-          onValueChange={toggleTheme}
-        />
         </SafeAreaView>
     );
 }

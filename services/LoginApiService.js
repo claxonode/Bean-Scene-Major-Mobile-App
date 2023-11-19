@@ -3,43 +3,44 @@ import {Alert} from 'react-native';
 
 const BASE_URL = 'http://10.0.2.2:5240';
 
+
 export async function login(username, password) {
     const url = new URL('/api/Tokens', BASE_URL);
 
-    const response = await fetch(url, {
-        // method:"GET"
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            email: username,
-            password: password
+    try{
+        const response = await fetch(url, {
+            // method:"GET"
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: username,
+                password: password
+            })
         })
-    })
-    if (response.status === 200) {
-        const token = await response.text();
-
-        await storeToken(token);
-        ///Current allows members to login because /api/Tokens/ does not check
-        //if they are a staffmember or not.
-        return {
-            authenticated: true,
-            token: token
-        };
-    }
-    else {
-        
-        const modelStateErrors = await response.text();
-        console.log(modelStateErrors)
-        // throw new ApiError(modelStateErrors,
-        //     "There was an error authen to the API"
-        // );
-        Alert.alert(modelStateErrors)
-        return {
-            authenticated: false,
-            token: null
+        if (response.status === 200) {
+            const token = await response.text();
+            await storeToken(token);
+            ///Current allows members to login because /api/Tokens/ does not check
+            //if they are a staffmember or not.
+            return {
+                authenticated: true,
+                token: token
+            };
         }
+        else if (response.status===400) {
+            return {
+                authenticated: false,
+                token: null
+            };
+        }
+        else {
+            throw new Error("Error");
+        }
+    }
+    catch (error) {
+        throw new Error("Error");
     }
 
 }
