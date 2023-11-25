@@ -8,6 +8,10 @@ import { AustralianCurrency, AustralianDate, ShortDate } from "../services/Forma
 import { useNavigation } from "@react-navigation/native";
 
 
+/**
+ * @function OrdersScreen Represents the orders screen for viewing orders
+ * @returns {JSX}
+ */
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -107,7 +111,12 @@ export default function OrdersScreen() {
   );
 }
 
-
+/**
+ * @function SelectTable A component that shows the tables that have pending orders
+ * @param {function} handlePress When pressed the orders shown will be that selected table
+ * @param {Array of Objects} buttonList Initial values of the select table button list.
+ * @returns {JSX}
+ */
 function SelectTable({handlePress,buttonList}) {
     // const [buttonList, setButtonList] = useState([])
 
@@ -149,7 +158,12 @@ function SelectOrderStatus({handlePress}) {
 );
 }
 
-
+/**
+ * @function OrderItem Represents a order item in the orderList
+ * @param {object} order An individual order item
+ * @param {function} handleCompletedOrder Function that fires when you complete the order
+ * @returns {JSX}
+ */
 function OrderItem({ order,handleCompletedOrder }) {
   const theme = useTheme()
   const [visible, setVisible] = useState(false);
@@ -179,6 +193,15 @@ function OrderItem({ order,handleCompletedOrder }) {
   );
 }
 
+/**
+ * @function ViewOrderModal When the user presses show order, this is the modal that shows.
+ * @param {object} navigation The navigation prop for navigating
+ * @param {object} order  An individual order item
+ * @param {boolean} visible Whether the modal is visible
+ * @param {function} hideModal Function that hides the modal
+ * @param {function} handleCompletedOrder Function that fires when you complete the order
+ * @returns {JSX}
+ */
 function ViewOrderModal({navigation,order,visible,hideModal,handleCompletedOrder}) {
 
 

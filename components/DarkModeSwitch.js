@@ -2,6 +2,10 @@ import { IconButton, Switch } from "react-native-paper"
 import { useContext } from "react";
 import { PreferencesContext } from "../services/PreferencesContext";
 
+/**
+ * @function DarkModeSwitch a component that toggles the theming of the mobile app.
+ * @returns {JSX}
+ */
 export default function DarkModeSwitch() {
     const {toggleTheme,isThemeDark} = useContext(PreferencesContext)
 

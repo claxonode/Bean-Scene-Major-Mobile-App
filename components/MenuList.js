@@ -10,7 +10,12 @@ import { getAllMenuItemsByCategoryQueryable } from '../services/MenuApiService';
 import { AustralianCurrency,Categories } from '../services/FormatService'
 
 
-
+/**
+ * @function MenuList - A function which shows all the menu items
+ * @param {object} selectedTable The order's assigned table
+ * @param {Array of objects} existingOrder If we navigate from edit order, it will send a order to populate the shopping cart.
+ * @returns {JSX}
+ */
 function MenuList({selectedTable,existingOrder}) {
 
   const [searchText, setSearchText] = useState("")
@@ -146,7 +151,19 @@ function MenuList({selectedTable,existingOrder}) {
 
 
 }
-
+/**
+ * @function MenuItem - An individual menu item.
+ * @param {object} selectedTable The order's assigned table
+ * @param {function} existingOrder If we navigate from edit order, it will send a order to populate the shopping cart.
+ * @param {boolean} inCart - Check if this item exists in the cart.
+ * @param {int} cartItemQuantity - The quantity of an item
+ * @param {string} cartItemNote - Initial value of the note
+ * @param {function} handleIncrease - A setter function which increments an item
+ * @param {function} handleDecrease - A setter function which decrements an item
+ * @param {function} handleRemove - A setter function which removes an item
+ * @param {function} handleNote - A setter function which adds a note to an item
+ * @returns {JSX}
+ */
 function MenuItem({ item, onPress, inCart, cartItemQuantity,cartItemNote, handleIncrease, handleDecrease, handleRemove,handleNote }) {
   const theme = useTheme()
   const [text,setText] = useState((cartItemNote!==undefined &&cartItemNote!==null )?cartItemNote:"")
@@ -210,12 +227,28 @@ return (
 );
 }
 
+/**
+ * @function MenuHeader - The header for each menu list's section
+ * @param {Array of objects} section The order's assigned table
+ * @returns {JSX}
+ */
 function MenuHeader({ section }) {
   return (
     <Text style={styles.menuHeader}>{section.title}</Text>
   )
 }
 
+/**
+ * @function OrderItemNotesModal A component used to edit an individual menu items note.
+ * @param {object} item - The item
+ * @param {int} cartItemQuantity - The item's quantity
+ * @param {string} text - The text of the note
+ * @param {function} setText - The setter function for the note
+ * @param {function} handleSubmit - The function that adds a note into the ordercart
+ * @param {function} hideModal - A function that hide the modal
+ * @param {boolean} visible - Check whether the modal should be visible or not
+ * @returns {JSX}
+ */
 function OrderItemNotesModal({item,cartItemQuantity,text,setText,handleSubmit,hideModal,visible}) {
   return (
     <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={{backgroundColor:'white',padding:20}}>

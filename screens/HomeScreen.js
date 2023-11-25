@@ -2,6 +2,10 @@ import React from 'react';
 import { View, Button, StyleSheet } from 'react-native';
 import { AuthContext } from '../services/AuthContext';
 
+/**
+ * @function HomeScreen Represents the home screen
+ * @returns {JSX}
+ */
 function HomeScreen({ navigation }) {
   const { signOut } = React.useContext(AuthContext);
   return (

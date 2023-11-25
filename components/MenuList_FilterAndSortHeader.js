@@ -6,7 +6,13 @@ import { AustralianCurrency } from '../services/FormatService'
 import { postNewOrder, updateOrder } from '../services/OrderApiService'
 import { getMenuCategories } from '../services/MenuApiService'
 
-
+/**
+ * @function FilterSearch - A component that is used to filter the menu items via the menu item's name
+ * @param {useState} onChange - A function that sets the query's state
+ * @param {string} query - The text within the query
+ * @param {string} placeholder - Placeholder text for the search bar
+ * @returns {JSX}
+ */
 export function FilterSearch({ onChange,query,placeholder }) {
     return (
         <Searchbar
@@ -21,6 +27,11 @@ export function FilterSearch({ onChange,query,placeholder }) {
     );
 }
 
+/**
+ * @function FilterCategory - A component that is used to filter the menu items via category
+ * @param {useState} onChange - A function that sets the state for which category we want to filter
+ * @returns {JSX}
+ */
 function FilterCategory({ onChange }) {
     const [buttonList, setButtonList] = useState([])
     // const buttonList = [
@@ -59,7 +70,11 @@ function FilterCategory({ onChange }) {
 };
 
 
-
+/**
+ * @function SortMenuItemsButton - A component that is used to sort the order of the menu items being displayed
+ * @param {useState} onChange - A function that sets the state for how to we want to sort the menu items being displayed
+ * @returns {JSX}
+ */
 function SortMenuItemsButton({ onChange }) {
     const [expand, setExpand] = useState(false)
     const handleExpand = () => setExpand(!expand)
@@ -93,7 +108,15 @@ function SortMenuItemsButton({ onChange }) {
         </View>
     );
 }
-
+/**
+ * @function ShoppingCart - A component that represents the shopping cart icon. When pressed it displays a modal which is used to confirm the order
+ * @param {int} total - The total price for the entire order
+ * @param {int} itemCount - The item count within an order
+ * @param {Array of objects} orderCart - The order cart
+ * @param {object} selectedTable - The order that the table is selected for
+ * @param {Array of objects} existingOrder - Used to populate data when it is used for editting an order.
+ * @returns {JSX}
+ */
 function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrder }) {
     // const navigation = useNavigation();
     const navigation = useNavigation();
@@ -118,6 +141,19 @@ function ShoppingCart({ total, itemCount, orderCart, selectedTable, existingOrde
         </View>
     );
 }
+/**
+ * @function ConfirmShoppingCartModal - A modal that displays data to confirm an order.
+ * @param {boolean} visible - Determines whether the modal is visible
+ * @param {function} hideModal - The function that hides the modal
+ * @param {int} total - The total price for the entire order
+ * @param {string} notes - The initial value of the notes
+ * @param {function} setNotes - A setter function that sets the note
+ * @param {object} selectedTable - The order that the table is selected for
+ * @param {Array of objects} orderCart - A representation of the current order
+ * @param {Array of objects} existingOrder - Used to populate data when it is used for editting an order and to determine it is going to POST or do PUT call
+ * @param {object} navigation - It is the useNavigation() function for navigating between screens
+ * @returns {JSX}
+ */
 function ConfirmShoppingCartModal({visible,hideModal,total,notes,setNotes,selectedTable,orderCart,existingOrder,navigation}) {
     const handleSubmission = async (existingOrder) => {
         let jsonData = {
@@ -177,7 +213,19 @@ function ConfirmShoppingCartModal({visible,hideModal,total,notes,setNotes,select
     );
 }
 
-
+/**
+ * @function FilterAndSortHeader - A sticky header bar which is used to filter/sort the menu items as well as create/update an order.
+ * @param {string} query - The text within the query
+ * @param {function} handleSearch - Function that sets the query
+ * @param {function} handleCategory - Function that sets the category
+ * @param {function} handleSort - Function that sets the the sort value
+ * @param {int} total - The total price for the entire order
+ * @param {int} itemCount - The initial value of the notes
+ * @param {object} selectedTable - The order that the table is selected for
+ * @param {Array of objects} orderCart - A representation of the current order
+ * @param {Array of objects} existingOrder - Used to populate data when it is used for editting an order and to determine it is going to POST or do PUT call
+ * @returns {JSX}
+ */
 export function FilterAndSortHeader({ query,handleSearch, handleCategory, handleSort, total, itemCount, orderCart, selectedTable, existingOrder }) {
 
     return <View style={styles.filterAndSortHeader}>

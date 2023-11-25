@@ -5,7 +5,10 @@ import {getAllTables} from "../services/TableApiService"
 import { SegmentedButtons,Text } from 'react-native-paper';
 
 
-
+/**
+ * @function TableSelection Represents the screen for selecting a table to create a new order
+ * @returns {JSX}
+ */
 export default function TableSelection() {
   const navigation = useNavigation();
 

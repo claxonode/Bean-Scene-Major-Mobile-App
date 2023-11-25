@@ -7,6 +7,10 @@ import { PreferencesContext } from '../services/PreferencesContext';
 import { useContext } from 'react';
 
 
+/**
+ * @function LoginScreen Represents the login screen
+ * @returns {JSX}
+ */
 export default function LoginScreen({ navigation }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState(null);

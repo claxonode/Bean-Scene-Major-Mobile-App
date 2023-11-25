@@ -2,6 +2,10 @@ import { useRoute } from '@react-navigation/native';
 import {View,Text} from 'react-native'
 import MenuList from '../components/MenuList';
 
+/**
+ * @function EditOrderScreen Represents the edit order screen
+ * @returns {JSX}
+ */
 function EditOrderScreen() {
     const route = useRoute();
     const { order } = route.params;
