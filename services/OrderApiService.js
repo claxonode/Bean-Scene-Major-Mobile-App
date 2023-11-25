@@ -1,5 +1,6 @@
 import { getToken } from "./TokenStorage";
 const BASE_URL = "http://10.0.2.2:5240";
+// const BASE_URL = 'https://bean-scene-foiegras-g.azurewebsites.net'
 
 export async function postNewOrder(order) {
     const finalUrl = new URL('api/Orders', BASE_URL)

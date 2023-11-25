@@ -1,6 +1,7 @@
 import { getToken, storeToken } from "./TokenStorage";
 
 const BASE_URL = "http://10.0.2.2:5240";
+// const BASE_URL = 'https://bean-scene-foiegras-g.azurewebsites.net'
 
 
 export async function getAllTables() {
