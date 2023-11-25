@@ -74,6 +74,16 @@ function App({ navigation }) {
         // Restore token stored in `SecureStore` or any other encrypted storage
         // userToken = await SecureStore.getItemAsync('userToken');
         userToken = await getToken();
+        const {exp} = jwtDecode(userToken);
+        const expirationTime = (exp * 1000) - 60000
+        //can test by changing >= to <=
+        if (Date.now() >= expirationTime) {
+            deleteToken();
+            setToken(null)
+        }
+        else {
+          setToken(userToken);
+        }
       } catch (e) {
         // Restoring token failed
       }
@@ -82,7 +92,7 @@ function App({ navigation }) {
 
       // This will switch to the App screen or Auth screen and this loading
       // screen will be unmounted and thrown away.
-      setToken(userToken);
+      // setToken(userToken);
     };
 
     bootstrapAsync();

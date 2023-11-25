@@ -1,5 +1,5 @@
 import { useRoute } from '@react-navigation/native';
-import MenuList from './MenuList';
+import MenuList from '../components/MenuList';
 
 
 function CreateScreen() {

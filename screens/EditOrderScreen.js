@@ -1,6 +1,6 @@
 import { useRoute } from '@react-navigation/native';
 import {View,Text} from 'react-native'
-import MenuList from './MenuList';
+import MenuList from '../components/MenuList';
 
 function EditOrderScreen() {
     const route = useRoute();

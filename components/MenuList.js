@@ -3,7 +3,7 @@ import { SafeAreaView, Pressable, StyleSheet, View, Dimensions, FlatList,Text as
 import { MENULIST, transformMenuForSectionList } from '../data/data';
 import { useRoute } from '@react-navigation/native';
 import { Searchbar, SegmentedButtons, List, IconButton, Portal, Modal,useTheme, Badge, DataTable,Text,TextInput} from 'react-native-paper';
-import { FilterAndSortHeader } from './MenuList_FilterAndSortHeader';
+import { FilterAndSortHeader } from './MenuList_FilterAndSortHeader'
 
 
 import { getAllMenuItemsByCategoryQueryable } from '../services/MenuApiService';
