@@ -6,7 +6,7 @@ const BASE_URL = 'http://10.0.2.2:5240';
 
 
 export async function login(username, password) {
-    const url = new URL('/api/Tokens', BASE_URL);
+    const url = new URL('/api/tokens', BASE_URL);
 
     try{
         const response = await fetch(url, {

@@ -7,10 +7,9 @@ async function seedData() {
   try {
     await client.connect();
 
-    const database = client.db('BeanSceneMobileApp');
+    const database = client.db('orderSystem');
     const menuItems = [
         {
-            _id: 1,
             name: "Latte",
             description: "A smooth milky latte",
             price: 4.30,
@@ -25,7 +24,6 @@ async function seedData() {
             ]
           }
           , {
-            _id: 2,
             name: "Pad Thai",
             description: "Pad Thai is a Thai dish of stir-fried rice noodles with eggs, vegetables and tofu in a sauce of tamarind, fish, dried shrimp, garlic, red chilli pepper and sugar.",
             price: 13.9,
@@ -44,7 +42,6 @@ async function seedData() {
               "Egg", "Fish"
             ]
           }, {
-            _id: 3,
             name: "Tom yum",
             description: "A well known Thai dish, spicy, sour, and aromatic soup that is traditionally served with rice.",
             price: 14.00,
@@ -65,7 +62,6 @@ async function seedData() {
               "Meat"
             ]
           }, {
-            _id: 4,
             name: "Strawberry Milkshake",
             description: "Strawberries that is blended with milk, served cold.",
             price: 6.00,
@@ -80,7 +76,6 @@ async function seedData() {
               "Milk"
             ]
           }, {
-            _id: 5,
             name: "Spaghetti",
             description: "Some Italian food",
             price: 15,

@@ -17,7 +17,9 @@ export async function getAllTables() {
     });
      */
     try {
-        const response = await fetch(finalUrl);
+        const response = await fetch(finalUrl,{
+          method:"GET"
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
