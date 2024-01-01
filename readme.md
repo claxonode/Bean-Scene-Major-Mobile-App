@@ -7,4 +7,4 @@
 3. Run cmd line: npm install
 4. Run cmd line: npm run android
 5. Deploy Major-BeanScene-Reservation-System
-![mobile-demo](https://github.com/claxonode/Bean-Scene-Major-Mobile-App/blob/master/mobile-demo.mp4)
+![mobile-demo](https://github.com/claxonode/Bean-Scene-Major-Mobile-App/blob/master/mobile-demo.gif)
